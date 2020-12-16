@@ -15,12 +15,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    # By default, actions/checkout will only check out the last commit. For
+    # pull requests, this is a temporary merge commit used to test integration
+    # against the master branch. Thefore, in order to get the actuall commit
+    # message we are interested in, we need to fetch more than one commit.
+    # Getting more commits can also be helpful for computing human-readable
+    # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
     - uses: actions/checkout@v2
-      # Note: this only checks a single commit according to the doc:
-      #   https://github.com/actions/checkout
-      # I should use fetch-depth: 0 to check all commit, or a custom number
-      # to check the desired number of commits. This would be useful in the
-      # case of VGC since the build name depends on previous commits.
+      with:
+        fetch-depth: 100
+
+    - name: Print git log
+      run: git log
 
     - name: Get commit branch and commit message
       if: github.event_name == 'push'
