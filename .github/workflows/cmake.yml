@@ -27,7 +27,9 @@ jobs:
       if: github.event_name == 'push'
       run: |
         echo "COMMIT_BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
-        echo "COMMIT_MESSAGE=${{github.event.head_commit.message}}" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "${{github.event.head_commit.message}}" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     # https://github.community/t/accessing-commit-message-in-pull-request-event/17158
     - name: Get commit branch and commit message
@@ -35,6 +37,30 @@ jobs:
       run: |
         echo "COMMIT_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
         echo "COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.event.after }})" >> $GITHUB_ENV
+
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables
+    - name: Print useful environment variables
+      if:
+      run: |
+        echo "GITHUB_WORKFLOW:      $GITHUB_WORKFLOW"
+        echo "GITHUB_RUN_ID:        $GITHUB_RUN_ID"
+        echo "GITHUB_RUN_NUMBER:    $GITHUB_RUN_NUMBER"
+        echo "GITHUB_ACTION:        $GITHUB_ACTION"
+        echo "GITHUB_ACTIONS:       $GITHUB_ACTIONS"
+        echo "GITHUB_ACTOR:         $GITHUB_ACTOR"
+        echo "GITHUB_REPOSITORY:    $GITHUB_REPOSITORY"
+        echo "GITHUB_EVENT_NAME:    $GITHUB_EVENT_NAME"
+        echo "GITHUB_EVENT_PATH:    $GITHUB_EVENT_PATH"
+        echo "GITHUB_WORKSPACE:     $GITHUB_WORKSPACE"
+        echo "GITHUB_SHA:           $GITHUB_SHA"
+        echo "GITHUB_REF:           $GITHUB_REF"
+        echo "GITHUB_HEAD_REF:      $GITHUB_HEAD_REF"
+        echo "GITHUB_BASE_REF:      $GITHUB_BASE_REF"
+        echo "GITHUB_SERVER_URL:    $GITHUB_SERVER_URL"
+        echo "GITHUB_API_URL:       $GITHUB_API_URL"
+        echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
+        echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
+        echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
