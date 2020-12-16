@@ -1,6 +1,6 @@
 name: CMake
 
-on: [push]
+on: [push, pull_request]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -15,12 +15,65 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    # By default, actions/checkout will only check out the last commit. For
+    # pull requests, this is a temporary merge commit used to test integration
+    # against the master branch. Thefore, in order to get the actuall commit
+    # message we are interested in, we need to fetch more than one commit.
+    # Getting more commits can also be helpful for computing human-readable
+    # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
     - uses: actions/checkout@v2
-      # Note: this only checks a single commit according to the doc:
-      #   https://github.com/actions/checkout
-      # I should use fetch-depth: 0 to check all commit, or a custom number
-      # to check the desired number of commits. This would be useful in the
-      # case of VGC since the build name depends on previous commits.
+      with:
+        fetch-depth: 100
+
+    - name: Print git log
+      run: git log
+
+    # In case of a push event, the commit we care about is simply HEAD.
+    # The current branch name can be found by parsing GITHUB_REF, for example,
+    # if we are on the master branch, then GITHUB_REF = refs/heads/master.
+    - name: Get commit branch and commit message
+      if: github.event_name == 'push'
+      run: |
+        echo "COMMIT_BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "$(git log --format=%B -n 1 HEAD)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # In case of a pull_request event, the commit we care about is HEAD^2, that
+    # is, the second parent of the pull request merge commit.
+    # The current branch name is directly given by GITHUB_HEAD_REF
+    - name: Get commit branch and commit message
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "COMMIT_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "$(git log --format=%B -n 1 HEAD^2)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables
+    - name: Print useful environment variables
+      if:
+      run: |
+        echo "GITHUB_WORKFLOW:      $GITHUB_WORKFLOW"
+        echo "GITHUB_RUN_ID:        $GITHUB_RUN_ID"
+        echo "GITHUB_RUN_NUMBER:    $GITHUB_RUN_NUMBER"
+        echo "GITHUB_ACTION:        $GITHUB_ACTION"
+        echo "GITHUB_ACTIONS:       $GITHUB_ACTIONS"
+        echo "GITHUB_ACTOR:         $GITHUB_ACTOR"
+        echo "GITHUB_REPOSITORY:    $GITHUB_REPOSITORY"
+        echo "GITHUB_EVENT_NAME:    $GITHUB_EVENT_NAME"
+        echo "GITHUB_EVENT_PATH:    $GITHUB_EVENT_PATH"
+        echo "GITHUB_WORKSPACE:     $GITHUB_WORKSPACE"
+        echo "GITHUB_SHA:           $GITHUB_SHA"
+        echo "GITHUB_REF:           $GITHUB_REF"
+        echo "GITHUB_HEAD_REF:      $GITHUB_HEAD_REF"
+        echo "GITHUB_BASE_REF:      $GITHUB_BASE_REF"
+        echo "GITHUB_SERVER_URL:    $GITHUB_SERVER_URL"
+        echo "GITHUB_API_URL:       $GITHUB_API_URL"
+        echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
+        echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
+        echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
@@ -32,8 +85,8 @@ jobs:
       # access regardless of the host operating system
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source 
-      # and build directories, but this is only available with CMake 3.13 and higher.  
+      # Note the current convention is to use the -S and -B options here to specify source
+      # and build directories, but this is only available with CMake 3.13 and higher.
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
@@ -42,10 +95,3 @@ jobs:
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
-
-    #- name: Test
-    #  working-directory: ${{runner.workspace}}/build
-    #  shell: bash
-    #  # Execute tests defined by the CMake configuration.  
-    #  # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-    #  run: ctest -C $BUILD_TYPE
