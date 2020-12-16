@@ -22,7 +22,6 @@ jobs:
       # to check the desired number of commits. This would be useful in the
       # case of VGC since the build name depends on previous commits.
 
-
     - name: Get commit branch and commit message
       if: github.event_name == 'push'
       run: |
