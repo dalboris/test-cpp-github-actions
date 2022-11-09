@@ -106,7 +106,7 @@ jobs:
     #.\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Install vcpkg and dependencies
-      working-directory: ${{env.VCPKG_ROOT}}
+      working-directory: ${{env.VCPKG_ROOT_PARENT}}
       shell: cmd
       run: |
         git clone --depth=1 --branch "%VCPKG_VERSION%" https://github.com/microsoft/vcpkg.git
