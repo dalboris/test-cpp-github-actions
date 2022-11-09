@@ -83,14 +83,14 @@ jobs:
         echo "VCPKG_ROOT=$(echo ${GITHUB_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
 
     - name: Bootstrap vcpkg
-      working-directory: ${{env.VCPKG_ROOT}}/vcpkg
+      working-directory: ${{env.VCPKG_ROOT}}
       shell: cmd
       run: |
         .\bootstrap-vcpkg.bat
 
     # For now, we test with manual dependencies. Later, we want to use a manifest file
     - name: Install vcpkg dependencies
-      working-directory: ${{github.VCPKG_ROOT}}/vcpkg
+      working-directory: ${{github.VCPKG_ROOT}}
       shell: cmd
       run: |
         .\vcpkg install freetype
