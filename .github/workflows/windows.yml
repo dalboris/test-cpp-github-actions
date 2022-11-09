@@ -6,7 +6,6 @@ env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
-  VCPKG_DEPENDENCIES: "freetype harfbuzz"
 
 defaults:
   run:
@@ -101,7 +100,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v8
+        key: cache-vcpkg-VCPKG_VERSION=${{env.VCPKG_VERSION}}-MSVC_VERSION=${{env.MSVC_VERSION}}-MANIFEST_FILE_HASH=${{hashFiles('vcpkg.json')}}
 
     #.\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
