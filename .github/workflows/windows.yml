@@ -75,6 +75,9 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
+    - name: Setup Developer Command Prompt for VS
+      uses: ilammy/msvc-dev-cmd@v1
+
     # TODO: -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
     - name: Configure
       working-directory: ${{runner.workspace}}
