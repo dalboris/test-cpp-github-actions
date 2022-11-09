@@ -113,7 +113,7 @@ jobs:
         cd vcpkg
         mkdir archives
         .\bootstrap-vcpkg.bat
-        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install "%VCPKG_DEPENDENCIES%"
+        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install freetype harfbuzz
 
     - name: List vcpkg installed packaged
       working-directory: ${{env.VCPKG_ROOT}}
