@@ -102,9 +102,8 @@ jobs:
         path: ${{env.VCPKG_ROOT}}
         key: cache-vcpkg-VCPKG_VERSION=${{env.VCPKG_VERSION}}-MSVC_VERSION=${{env.MSVC_VERSION}}-MANIFEST_FILE_HASH=${{hashFiles('vcpkg.json')}}
 
-    #.\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Install vcpkg and dependencies
+      name: Setup vcpkg
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       shell: cmd
       run: |
@@ -112,6 +111,15 @@ jobs:
         cd vcpkg
         mkdir archives
         .\bootstrap-vcpkg.bat
+        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install
+
+    # This step is optional since it would be done by CMake anyway, but it's nice to have it as
+    # a separate step in order to
+    - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
+      name: Install vcpkg dependencies
+      working-directory: ${{env.VCPKG_ROOT}}
+      shell: cmd
+      run: |
         .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install
 
     - name: List vcpkg installed packaged
