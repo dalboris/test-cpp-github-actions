@@ -76,19 +76,19 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
-# We need VCPKG_DEFAULT_BINARY_CACHE otherwise it would use:
-#     C:\Users\runneradmin\AppData\Local\vcpkg\archives\
-#
-# For documentation on binary caching, see:
-#    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
-#
-# VCPKG_DEFAULT_BINARY_CACHE to override this cache location and make sure
-# that it is part of our GitHub cache, see:
-#
+    # We need VCPKG_DEFAULT_BINARY_CACHE otherwise it would use:
+    #     C:\Users\runneradmin\AppData\Local\vcpkg\archives\
+    #
+    # For documentation on binary caching, see:
+    #    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
+    #
+    # VCPKG_DEFAULT_BINARY_CACHE to override this cache location and make sure
+    # that it is part of our GitHub cache, see:
+    #
     - name: Setup vckpg environment variables
       run: |
-        echo "VCPKG_ROOT=$(echo ${GITHUB_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
-        #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo ${GITHUB_WORKSPACE}/vcpkg/archives)" >> $GITHUB_ENV
+        echo "VCPKG_ROOT=$(echo ${RUNNER_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
+        #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo ${RUNNER_WORKSPACE}/vcpkg/archives)" >> $GITHUB_ENV
 
     - name: Cache vcpkg
       id: cache-vcpkg
