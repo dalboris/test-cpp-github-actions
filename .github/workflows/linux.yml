@@ -1,0 +1,92 @@
+name: Linux
+
+on: [push, pull_request]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # By default, actions/checkout will only check out the last commit. For
+    # pull requests, this is a temporary merge commit used to test integration
+    # against the master branch. Thefore, in order to get the actuall commit
+    # message we are interested in, we need to fetch more than one commit.
+    # Getting more commits can also be helpful for computing human-readable
+    # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 100
+
+    - name: Print git log
+      run: git log
+
+    # In case of a push event, the commit we care about is simply HEAD.
+    # The current branch name can be found by parsing GITHUB_REF, for example,
+    # if we are on the master branch, then GITHUB_REF = refs/heads/master.
+    - name: Get commit branch and commit message
+      if: github.event_name == 'push'
+      run: |
+        echo "COMMIT_BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "$(git log --format=%B -n 1 HEAD)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # In case of a pull_request event, the commit we care about is HEAD^2, that
+    # is, the second parent of the pull request merge commit.
+    # The current branch name is directly given by GITHUB_HEAD_REF
+    - name: Get commit branch and commit message
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "COMMIT_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "$(git log --format=%B -n 1 HEAD^2)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables
+    - name: Print useful environment variables
+      if:
+      run: |
+        echo "GITHUB_WORKFLOW:      $GITHUB_WORKFLOW"
+        echo "GITHUB_RUN_ID:        $GITHUB_RUN_ID"
+        echo "GITHUB_RUN_NUMBER:    $GITHUB_RUN_NUMBER"
+        echo "GITHUB_ACTION:        $GITHUB_ACTION"
+        echo "GITHUB_ACTIONS:       $GITHUB_ACTIONS"
+        echo "GITHUB_ACTOR:         $GITHUB_ACTOR"
+        echo "GITHUB_REPOSITORY:    $GITHUB_REPOSITORY"
+        echo "GITHUB_EVENT_NAME:    $GITHUB_EVENT_NAME"
+        echo "GITHUB_EVENT_PATH:    $GITHUB_EVENT_PATH"
+        echo "GITHUB_WORKSPACE:     $GITHUB_WORKSPACE"
+        echo "GITHUB_SHA:           $GITHUB_SHA"
+        echo "GITHUB_REF:           $GITHUB_REF"
+        echo "GITHUB_HEAD_REF:      $GITHUB_HEAD_REF"
+        echo "GITHUB_BASE_REF:      $GITHUB_BASE_REF"
+        echo "GITHUB_SERVER_URL:    $GITHUB_SERVER_URL"
+        echo "GITHUB_API_URL:       $GITHUB_API_URL"
+        echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
+        echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
+        echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
+
+    - name: Configure
+      working-directory: ${{runner.workspace}}
+      run: |
+        mkdir build
+        cd build
+        cmake --version
+        cmake "$GITHUB_WORKSPACE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build . --parallel $PARALLEL_JOBS
