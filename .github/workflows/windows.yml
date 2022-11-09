@@ -88,11 +88,11 @@ jobs:
       run: |
         .\bootstrap-vcpkg.bat
 
-    # For now, we test with manual dependencies. Later, we want to use a manifest file
-    - name: Install vcpkg dependencies
-      working-directory: ${{github.VCPKG_ROOT}}
-      run: |
-        vcpkg --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
+    # # For now, we test with manual dependencies. Later, we want to use a manifest file
+    # - name: Install vcpkg dependencies
+    #   working-directory: ${{github.VCPKG_ROOT}}
+    #   run: |
+    #     vcpkg --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1

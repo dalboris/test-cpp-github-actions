@@ -1,0 +1,7 @@
+{
+  "name": "test-cpp-github-actions",
+  "version-string": "latest",
+  "dependencies": [
+    "freetype"
+  ]
+}
