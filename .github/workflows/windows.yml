@@ -87,7 +87,7 @@ jobs:
     #
     - name: Setup vckpg environment variables
       run: |
-        github_workspace_parent="${{github.workspace}}"
+        github_workspace_parent="$(dirname ${{github.workspace}})"
         echo $github_workspace_parent
         echo "VCPKG_ROOT_PARENT=$(echo $github_workspace_parent)" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$(echo $github_workspace_parent/vcpkg)" >> $GITHUB_ENV
@@ -143,7 +143,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake . -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
