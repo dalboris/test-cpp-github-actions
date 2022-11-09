@@ -115,13 +115,13 @@ jobs:
       run: |
         .\bootstrap-vcpkg.bat
 
+    #.\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Install vcpkg dependencies
       working-directory: ${{env.VCPKG_ROOT}}
       shell: cmd
       run: |
         .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install
-        #.\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
       working-directory: ${{env.VCPKG_ROOT}}
