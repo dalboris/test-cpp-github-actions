@@ -9,12 +9,16 @@ on: [push, pull_request]
 # that it is part of our GitHub cache, see:
 #    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
 #
-
+# What options can be given to CMake to configure vcpkg?
+#    https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html
+#
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
   VCPKG_DEFAULT_BINARY_CACHE: D:/a/test-cpp-github-actions/test-cpp-github-actions/vcpkg/archives
+  VCPKG_INSTALL_OPTIONS: --debug
+  VCPKG_INSTALLED_DIR: D:/a/test-cpp-github-actions/test-cpp-github-actions/vcpkg/installed
 
 defaults:
   run:
@@ -94,7 +98,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v2
+        key: cache-vgpkg-v3
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit == 'true' }}
       name: List vcpkg installed packaged
@@ -107,6 +111,8 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        mkdir archives
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Bootstrap vcpkg
