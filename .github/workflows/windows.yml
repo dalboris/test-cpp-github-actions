@@ -87,7 +87,7 @@ jobs:
     #
     - name: Setup vckpg environment variables
       run: |
-        github_workspace_parent="$(dirname ${{github.workspace}})"
+        github_workspace_parent="$(dirname "${{github.workspace}}")"
         echo $github_workspace_parent
         echo "VCPKG_ROOT_PARENT=$(echo $github_workspace_parent)" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$(echo $github_workspace_parent/vcpkg)" >> $GITHUB_ENV
@@ -119,12 +119,12 @@ jobs:
       name: Install vcpkg dependencies
       working-directory: ${{github.VCPKG_ROOT}}
       run: |
-        vcpkg --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows     runner/vckpg/vcpkg.exe  runner/repo/vcpkg.json
+        .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
-      working-directory: ${{github.workspace}}
+      working-directory: ${{github.VCPKG_ROOT}}
       run: |
-        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
+        .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
@@ -148,9 +148,3 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: cmake --build . --parallel $PARALLEL_JOBS
-
-    - name: List vcpkg installed packaged
-      working-directory: ${{github.workspace}}
-      run: |
-        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
-
