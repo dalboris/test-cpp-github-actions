@@ -120,6 +120,7 @@ jobs:
       working-directory: ${{github.VCPKG_ROOT}}
       shell: cmd
       run: |
+        dir
         .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
