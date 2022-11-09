@@ -96,7 +96,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v4
+        key: cache-vgpkg-v5
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit == 'true' }}
       name: List vcpkg installed packaged
@@ -138,7 +138,9 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS="--debug" -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
+        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS="--debug --binarysource=clear"
+
+#        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS="--debug --binarysource=clear" -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
