@@ -12,6 +12,9 @@ on: [push, pull_request]
 # What options can be given to CMake to configure vcpkg?
 #    https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html
 #
+# To try:
+# --binarysource=clear
+#
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
@@ -104,7 +107,7 @@ jobs:
       name: List vcpkg installed packaged
       working-directory: ${{github.workspace}}
       run: |
-        vcpkg --vcpkg-root="$VCPKG_ROOT" list
+        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Clone vcpkg
@@ -142,6 +145,11 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: cmake --build . --parallel $PARALLEL_JOBS
+
+    - name: List vcpkg installed packaged
+      working-directory: ${{github.workspace}}
+      run: |
+        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
 
 
