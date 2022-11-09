@@ -2,21 +2,10 @@ name: Windows
 
 on: [push, pull_request]
 
-# Note: by default, vcpkg (invoked by CMake, based on the manifest file) would
-# compile the dependencies and store them in the "vcpkg binary cache" at
-# `C:\Users\runneradmin\AppData\Local\vcpkg\archives\`. We define
-# VCPKG_DEFAULT_BINARY_CACHE to override this cache location and make sure
-# that it is part of our GitHub cache, see:
-#    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
-#
-# What options can be given to CMake to configure vcpkg?
-#    https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html
-#
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
-  VCPKG_DEFAULT_BINARY_CACHE: D:/a/test-cpp-github-actions/test-cpp-github-actions/vcpkg/archives
 
 defaults:
   run:
@@ -87,22 +76,26 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
-    - name: Set vckpg root
+# We need VCPKG_DEFAULT_BINARY_CACHE otherwise it would use:
+#     C:\Users\runneradmin\AppData\Local\vcpkg\archives\
+#
+# For documentation on binary caching, see:
+#    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
+#
+# VCPKG_DEFAULT_BINARY_CACHE to override this cache location and make sure
+# that it is part of our GitHub cache, see:
+#
+    - name: Setup vckpg environment variables
       run: |
         echo "VCPKG_ROOT=$(echo ${GITHUB_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo ${GITHUB_WORKSPACE}/vcpkg/archives)" >> $GITHUB_ENV
 
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v5
-
-    - if: ${{ steps.cache-vcpkg.outputs.cache-hit == 'true' }}
-      name: List vcpkg installed packaged
-      working-directory: ${{github.workspace}}
-      run: |
-        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
+        key: cache-vgpkg-v6
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Clone vcpkg
@@ -119,18 +112,27 @@ jobs:
       run: |
         .\bootstrap-vcpkg.bat
 
-    # # For now, we test with manual dependencies. Later, we want to use a manifest file
-    # - name: Install vcpkg dependencies
-    #   working-directory: ${{github.VCPKG_ROOT}}
-    #   run: |
-    #     vcpkg --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
+    - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
+      name: Install vcpkg dependencies
+      working-directory: ${{github.VCPKG_ROOT}}
+      run: |
+        vcpkg --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
+
+    - name: List vcpkg installed packaged
+      working-directory: ${{github.workspace}}
+      run: |
+        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
 
-# To try:
-# -DVCPKG_INSTALL_OPTIONS="--binarysource=clear"
-#
+    # For documentation on what vcpkg options can be given to CMake, see:
+    #    https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html
+    #
+    # Examples:
+    #  - -DVCPKG_INSTALL_OPTIONS="--debug;--binarysource=clear"
+    #  - -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
+    #
     - name: Configure
       working-directory: ${{github.workspace}}
       run: |
@@ -138,9 +140,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS="--binarysource=clear"
-
-#        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS="--debug --binarysource=clear" -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
+        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
