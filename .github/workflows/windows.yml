@@ -91,9 +91,8 @@ jobs:
     # For now, we test with manual dependencies. Later, we want to use a manifest file
     - name: Install vcpkg dependencies
       working-directory: ${{github.VCPKG_ROOT}}
-      shell: cmd
       run: |
-        vcpkg --vcpkg-root="${{github.VCPKG_ROOT}}" install freetype
+        vcpkg --vcpkg-root="$VCPKG_ROOT" install freetype
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
