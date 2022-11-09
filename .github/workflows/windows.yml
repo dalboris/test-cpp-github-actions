@@ -93,7 +93,7 @@ jobs:
       working-directory: ${{github.VCPKG_ROOT}}
       shell: cmd
       run: |
-        .\vcpkg install freetype
+        vcpkg install freetype
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
