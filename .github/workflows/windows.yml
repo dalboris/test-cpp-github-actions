@@ -121,7 +121,7 @@ jobs:
       shell: cmd
       run: |
         dir
-        .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
+        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
       working-directory: ${{env.VCPKG_ROOT}}
