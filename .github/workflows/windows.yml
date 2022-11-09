@@ -2,10 +2,19 @@ name: Windows
 
 on: [push, pull_request]
 
+# Note: by default, vcpkg (invoked by CMake, based on the manifest file) would
+# compile the dependencies and store them in the "vcpkg binary cache" at
+# `C:\Users\runneradmin\AppData\Local\vcpkg\archives\`. We define
+# VCPKG_DEFAULT_BINARY_CACHE to override this cache location and make sure
+# that it is part of our GitHub cache, see:
+#    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
+#
+
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
+  VCPKG_DEFAULT_BINARY_CACHE: D:/a/test-cpp-github-actions/test-cpp-github-actions/vcpkg/archives
 
 defaults:
   run:
@@ -85,7 +94,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v1
+        key: cache-vgpkg-v2
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit == 'true' }}
       name: List vcpkg installed packaged
