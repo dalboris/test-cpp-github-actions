@@ -79,18 +79,18 @@ jobs:
     - name: Clone vcpkg
       working-directory: ${{github.workspace}}
       run: |
-        # git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
+        git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         echo "VCPKG_ROOT=$(echo ${GITHUB_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
 
     - name: Bootstrap vcpkg
-      working-directory: ${{github.workspace}}/vcpkg
+      working-directory: ${{env.VCPKG_ROOT}}/vcpkg
       shell: cmd
       run: |
         .\bootstrap-vcpkg.bat
 
     # For now, we test with manual dependencies. Later, we want to use a manifest file
     - name: Install vcpkg dependencies
-      working-directory: ${{github.workspace}}/vcpkg
+      working-directory: ${{github.VCPKG_ROOT}}/vcpkg
       shell: cmd
       run: |
         .\vcpkg install freetype
