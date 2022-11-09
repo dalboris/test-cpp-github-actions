@@ -88,13 +88,13 @@ jobs:
     #
     - name: Setup vckpg environment variables
       run: |
-        #echo "VCPKG_ROOT_PARENT=$(echo "${{github.workspace}}")" >> $GITHUB_ENV
-        #echo "VCPKG_ROOT=$(echo "${{github.workspace}}/vcpkg")" >> $GITHUB_ENV
-        #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "${{github.workspace}}/vcpkg/archives")" >> $GITHUB_ENV
-        github_workspace_parent="$(dirname "${{github.workspace}}")"
-        echo "VCPKG_ROOT_PARENT=$(echo "$github_workspace_parent")" >> $GITHUB_ENV
-        echo "VCPKG_ROOT=$(echo "$github_workspace_parent/vcpkg")" >> $GITHUB_ENV
-        echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "$github_workspace_parent/vcpkg/archives")" >> $GITHUB_ENV
+        echo "VCPKG_ROOT_PARENT=$(echo "${{github.workspace}}")" >> $GITHUB_ENV
+        echo "VCPKG_ROOT=$(echo "${{github.workspace}}/vcpkg")" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "${{github.workspace}}/vcpkg/archives")" >> $GITHUB_ENV
+        #github_workspace_parent="$(dirname "${{github.workspace}}")"
+        #echo "VCPKG_ROOT_PARENT=$(echo "$github_workspace_parent")" >> $GITHUB_ENV
+        #echo "VCPKG_ROOT=$(echo "$github_workspace_parent/vcpkg")" >> $GITHUB_ENV
+        #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "$github_workspace_parent/vcpkg/archives")" >> $GITHUB_ENV
 
     - name: Cache vcpkg
       id: cache-vcpkg
@@ -113,7 +113,7 @@ jobs:
         cd vcpkg
         mkdir archives
         .\bootstrap-vcpkg.bat
-        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install freetype harfbuzz
+        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install
 
     - name: List vcpkg installed packaged
       working-directory: ${{env.VCPKG_ROOT}}
@@ -138,7 +138,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_MANIFEST_MODE=OFF
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
