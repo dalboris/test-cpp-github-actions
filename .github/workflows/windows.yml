@@ -82,39 +82,31 @@ jobs:
         # git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         echo "VCPKG_ROOT=$(echo ${GITHUB_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
 
-    - name: Test VCPKG_ROOT
+    - name: Bootstrap vcpkg
+      working-directory: ${{github.workspace}}/vcpkg
+      shell: cmd
+      run: |
+        .\bootstrap-vcpkg.bat
+
+    # For now, we test with manual dependencies. Later, we want to use a manifest file
+    - name: Install vcpkg dependencies
+      working-directory: ${{github.workspace}}/vcpkg
+      shell: cmd
+      run: |
+        .\vcpkg install freetype
+
+    - name: Setup Developer Command Prompt for VS
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure
       working-directory: ${{github.workspace}}
-      env:
-          VCPKG_ROOT_2: /some/dir
       run: |
         echo "vcpkg root = $VCPKG_ROOT"
-        echo "vcpkg root 2 = $VCPKG_ROOT_2"
+        mkdir build
+        cd build
+        cmake --version
+        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 
-    # - name: Bootstrap vcpkg
-    #   working-directory: ${{github.workspace}}/vcpkg
-    #   shell: cmd
-    #   run: |
-    #     .\bootstrap-vcpkg.bat
-
-    # # For now, we test with manual dependencies. Later, we want to use a manifest file
-    # - name: Install vcpkg dependencies
-    #   working-directory: ${{github.workspace}}/vcpkg
-    #   shell: cmd
-    #   run: |
-    #     .\vcpkg install freetype
-
-    # - name: Setup Developer Command Prompt for VS
-    #   uses: ilammy/msvc-dev-cmd@v1
-
-    # - name: Configure
-    #   working-directory: ${{github.workspace}}
-    #   run: |
-    #     echo "vcpkg root = $VCPKG_ROOT"
-    #     mkdir build
-    #     cd build
-    #     cmake --version
-    #     cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-
-    # - name: Build
-    #   working-directory: ${{github.workspace}}/build
-    #   run: cmake --build . --parallel $PARALLEL_JOBS
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --parallel $PARALLEL_JOBS
