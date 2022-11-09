@@ -12,16 +12,11 @@ on: [push, pull_request]
 # What options can be given to CMake to configure vcpkg?
 #    https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html
 #
-# To try:
-# --binarysource=clear
-#
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
   VCPKG_DEFAULT_BINARY_CACHE: D:/a/test-cpp-github-actions/test-cpp-github-actions/vcpkg/archives
-  VCPKG_INSTALL_OPTIONS: --debug
-  VCPKG_INSTALLED_DIR: D:/a/test-cpp-github-actions/test-cpp-github-actions/vcpkg/installed
 
 defaults:
   run:
@@ -101,7 +96,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v3
+        key: cache-vgpkg-v4
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit == 'true' }}
       name: List vcpkg installed packaged
@@ -133,6 +128,9 @@ jobs:
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
 
+# To try:
+# -DVCPKG_INSTALL_OPTIONS="--binarysource=clear"
+#
     - name: Configure
       working-directory: ${{github.workspace}}
       run: |
@@ -140,7 +138,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS="--debug" -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
