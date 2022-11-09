@@ -118,13 +118,14 @@ jobs:
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Install vcpkg dependencies
       working-directory: ${{github.VCPKG_ROOT}}
+      shell: cmd
       run: |
-        ./vcpkg.exe --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
+        .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
       working-directory: ${{github.VCPKG_ROOT}}
       run: |
-        ./vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
+        vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
