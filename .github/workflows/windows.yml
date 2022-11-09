@@ -120,7 +120,6 @@ jobs:
       working-directory: ${{env.VCPKG_ROOT}}
       shell: cmd
       run: |
-        dir
         .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
@@ -137,6 +136,7 @@ jobs:
     # Examples:
     #  - -DVCPKG_INSTALL_OPTIONS="--debug;--binarysource=clear"
     #  - -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
+    #  - -DVCPKG_MANIFEST_MODE=OFF
     #
     - name: Configure
       working-directory: ${{github.workspace}}
@@ -145,7 +145,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_MANIFEST_MODE=OFF
 
     - name: Build
       working-directory: ${{github.workspace}}/build
