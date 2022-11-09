@@ -5,6 +5,7 @@ on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
+  VCPKG_VERSION: 2022.05.10
 
 defaults:
   run:
@@ -75,18 +76,37 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
+    - name: Clone vcpkg
+      working-directory: ${{github.workspace}}
+      run: |
+        git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
+        echo "VCPKG_ROOT=$(echo ${GITHUB_WORKSPACE}/vcpkg)" >> $GITHUB_ENV
+
+    - name: Bootstrap vcpkg
+      working-directory: ${{github.workspace}}/vcpkg
+      shell: cmd
+      run: |
+        .\bootstrap-vcpkg.bat
+
+    # For now, we test with manual dependencies. Later, we want to use a manifest file
+    - name: Install vcpkg dependencies
+      working-directory: ${{github.workspace}}/vcpkg
+      shell: cmd
+      run: |
+        .\vcpkg freetype
+
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
 
-    # TODO: -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
     - name: Configure
-      working-directory: ${{runner.workspace}}
+      working-directory: ${{github.workspace}}
       run: |
+        echo "vcpkg root = $VCPKG_ROOT"
         mkdir build
         cd build
         cmake --version
-        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+        cmake "$GITHUB_WORKSPACE" -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{github.workspace}}/build
       run: cmake --build . --parallel $PARALLEL_JOBS

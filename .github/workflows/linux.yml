@@ -80,7 +80,7 @@ jobs:
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
     - name: Configure
-      working-directory: ${{runner.workspace}}
+      working-directory: ${{github.workspace}}
       run: |
         mkdir build
         cd build
@@ -88,5 +88,5 @@ jobs:
         cmake "$GITHUB_WORKSPACE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{github.workspace}}/build
       run: cmake --build . --parallel $PARALLEL_JOBS
