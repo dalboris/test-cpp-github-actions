@@ -20,13 +20,17 @@
 
 #include <foo/foo.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 namespace foo {
 
 Foo::Foo(int x) :
     x_(x)
 {
-
+    FT_Library library;
+    FT_Init_FreeType(&library);
+    FT_Done_FreeType(library);
 }
 
 int Foo::x() const
