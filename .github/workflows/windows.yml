@@ -117,14 +117,14 @@ jobs:
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Install vcpkg dependencies
-      working-directory: ${{github.VCPKG_ROOT}}
+      working-directory: ${{env.VCPKG_ROOT}}
       shell: cmd
       run: |
         dir
         .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
-      working-directory: ${{github.VCPKG_ROOT}}
+      working-directory: ${{env.VCPKG_ROOT}}
       run: |
         vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
