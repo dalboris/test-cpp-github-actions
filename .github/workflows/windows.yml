@@ -87,18 +87,18 @@ jobs:
     #
     - name: Setup vckpg environment variables
       run: |
-        github_workspace_parent="$(dirname "${{github.workspace}}")"
-        echo $github_workspace_parent
-        echo "VCPKG_ROOT_PARENT=$(echo $github_workspace_parent)" >> $GITHUB_ENV
-        echo "VCPKG_ROOT=$(echo $github_workspace_parent/vcpkg)" >> $GITHUB_ENV
-        echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo $github_workspace_parent/vcpkg/archives)" >> $GITHUB_ENV
+        #github_workspace_parent="$(dirname "${{github.workspace}}")"
+        #echo $github_workspace_parent
+        echo "VCPKG_ROOT_PARENT=$(echo "${{github.workspace}}")" >> $GITHUB_ENV
+        echo "VCPKG_ROOT=$(echo "${{github.workspace}}/vcpkg")" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "${{github.workspace}}/vcpkg/archives")" >> $GITHUB_ENV
 
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vgpkg-v6
+        key: cache-vgpkg-v7
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Clone vcpkg
@@ -120,12 +120,13 @@ jobs:
       working-directory: ${{env.VCPKG_ROOT}}
       shell: cmd
       run: |
-        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
+        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows
+        #.\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" install freetype --triplet=x64-windows
 
     - name: List vcpkg installed packaged
       working-directory: ${{env.VCPKG_ROOT}}
       run: |
-        vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
+        $VCPKG_ROOT/vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
