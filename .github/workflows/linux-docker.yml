@@ -44,7 +44,7 @@ jobs:
     #     fatal: detected dubious ownership in repository at '/__w/<user>/<repo>'
     #
     - name: Configure git
-      run: git config --global --add safe.directory .
+      run: git config --global --add safe.directory `pwd`
 
     # In case of a push event, the commit we care about is simply HEAD.
     # The current branch name can be found by parsing GITHUB_REF, for example,
