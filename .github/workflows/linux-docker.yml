@@ -34,6 +34,9 @@ jobs:
     - name: Print git log
       run: ls -al
 
+    - name: Install Dependencies
+      run: sudo apt install cmake
+
     # In case of a push event, the commit we care about is simply HEAD.
     # The current branch name can be found by parsing GITHUB_REF, for example,
     # if we are on the master branch, then GITHUB_REF = refs/heads/master.
