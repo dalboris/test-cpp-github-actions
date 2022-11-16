@@ -13,15 +13,32 @@ jobs:
 
     steps:
 
-    # Note: Default CMake is 3.10.2. You may want to install a newer one here
-    - name: Install Dependencies
+    - name: Install Dependencies 1
       run: |
         apt-get update
         apt-get install -y software-properties-common  # for add-apt-repository
         add-apt-repository ppa:git-core/ppa            # we need git 2.18+ (default is 2.17)
+
+    - name: wget Dependencies 2
+      run: |
+        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+
+    - name: wget Dependencies 3
+      run: |
+        apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
+
+    - name: wget Dependencies 4
+      run: |
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4 # apt.kitware.com public key
+
+    - name: wget Dependencies 5
+      run: |
         wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
         apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4 # apt.kitware.com public key
+
+    - name: wget Dependencies 6
+      run: |
         apt-get update
         apt-get install -y git cmake build-essential libfreetype6-dev
 
