@@ -21,6 +21,7 @@ jobs:
 
     - name: wget Dependencies 2
       run: |
+        apt-get install -y gpg wget                    # for kitware public key
         wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
 
     - name: wget Dependencies 3
