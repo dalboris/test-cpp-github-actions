@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 env:
   BUILD_TYPE: Release
-  PARALLEL_JOBS: 5
 
 defaults:
   run:
@@ -21,6 +20,7 @@ jobs:
 
     steps:
 
+    # TODO: newer cmake? current is 3.10.2
     - name: Install Dependencies
       run: |
         apt-get update
@@ -110,4 +110,4 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      run: cmake --build . --parallel $PARALLEL_JOBS
+      run: cmake --build .
