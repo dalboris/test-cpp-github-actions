@@ -13,52 +13,40 @@ jobs:
 
     steps:
 
-    - name: Install Dependencies 1
+    - name: Install and Configure Recent Git
       run: |
         apt-get update
-        apt-get install -y software-properties-common  # for add-apt-repository
-        add-apt-repository ppa:git-core/ppa            # we need git 2.18+ (default is 2.17)
-
-    - name: wget Dependencies 2
-      run: |
-        apt-get install -y gpg wget                    # for kitware public key
-        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-
-    - name: wget Dependencies 3
-      run: |
-        apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
-
-    - name: wget Dependencies 4
-      run: |
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4 # apt.kitware.com public key
-
-    - name: wget Dependencies 5
-      run: |
-        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-        apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4 # apt.kitware.com public key
-
-    - name: wget Dependencies 6
-      run: |
+        apt-get install -y software-properties-common
+        add-apt-repository ppa:git-core/ppa
         apt-get update
-        apt-get install -y git cmake build-essential libfreetype6-dev
+        apt-get install -y git
+        git config --global --add safe.directory `pwd` # Fix "fatal: detected dubious ownership in repository at '/__w/<user>/<repo>'""
+
+    # See documentation at:
+    # - https://apt.kitware.com/
+    # - https://askubuntu.com/questions/355565/how-do-i-install-the-latest-version-of-cmake-from-the-command-line
+    - name: Install Recent CMake
+      run: |
+        apt-get install -y gpg wget
+        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4
+        apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
+        apt-get update
+        apt-get install -y cmake
+
+    - name: Install Other Dependencies
+      run: |
+        apt-get install -y build-essential libfreetype6-dev
 
     # By default, actions/checkout will only check out the last commit. For
     # pull requests, this is a temporary merge commit used to test integration
-    # against the master branch. Thefore, in order to get the actuall commit
+    # against the master branch. Therefore, in order to get the actual commit
     # message we are interested in, we need to fetch more than one commit.
     # Getting more commits can also be helpful for computing human-readable
     # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
     - uses: actions/checkout@v2
       with:
         fetch-depth: 100
-
-    # Fix the following error when running git:
-    #
-    #     fatal: detected dubious ownership in repository at '/__w/<user>/<repo>'
-    #
-    - name: Configure git
-      run: git config --global --add safe.directory `pwd`
 
     - name: Print git log
       run: git log
@@ -119,4 +107,4 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      run: cmake --build .
+      run: cmake --build . --parallel $PARALLEL_JOBS
