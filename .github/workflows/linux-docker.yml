@@ -27,7 +27,7 @@ jobs:
         apt-get install -y software-properties-common  # for add-apt-repository
         add-apt-repository ppa:git-core/ppa            # we need git 2.18+ (default is 2.17)
         apt-get update
-        apt-get install -y git cmake build-essential
+        apt-get install -y git cmake build-essential libfreetype6-dev
 
     # By default, actions/checkout will only check out the last commit. For
     # pull requests, this is a temporary merge commit used to test integration
