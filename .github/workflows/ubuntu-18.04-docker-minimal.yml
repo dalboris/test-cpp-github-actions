@@ -1,40 +1,22 @@
 name: Ubuntu 18.04 (Docker Minimal)
-
 on: [push, pull_request]
-
 jobs:
   build:
     runs-on: ubuntu-latest
     container: ubuntu:18.04
-
     steps:
-
-    # Note: Default CMake is 3.10.2. You may want to install a newer one here
-    - name: Install Dependencies
-      run: |
-        apt-get update
-        apt-get install -y software-properties-common  # for add-apt-repository
-        add-apt-repository ppa:git-core/ppa            # actions/checkout needs git 2.18+ (default is 2.17)
-        apt-get update
-        apt-get install -y git cmake build-essential libfreetype6-dev
 
     - uses: actions/checkout@v2
 
-    # Fix the following error when running git:
-    #
-    #     fatal: detected dubious ownership in repository at '/__w/<user>/<repo>'
-    #
-    #- name: Configure git
-    #  run: git config --global --add safe.directory `pwd`
+    - name: Install Dependencies
+      run: |
+        apt-get install -y cmake build-essential libfreetype6-dev
 
-    - name: Configure
+    - name: Build
       working-directory: ${{github.workspace}}
       run: |
         mkdir build
         cd build
         cmake --version
         cmake .. -DCMAKE_BUILD_TYPE=Release
-
-    - name: Build
-      working-directory: ${{github.workspace}}/build
-      run: cmake --build .
+        cmake --build .
