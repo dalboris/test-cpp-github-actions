@@ -1,26 +1,19 @@
-name: Linux Docker
+name: Ubuntu 18.04 (Docker)
 
 on: [push, pull_request]
 
 env:
   BUILD_TYPE: Release
-
-defaults:
-  run:
-    shell: bash
+  PARALLEL_JOBS: 5
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
     container: ubuntu:18.04
 
     steps:
 
-    # TODO: newer cmake? current is 3.10.2
+    # Note: Default CMake is 3.10.2. You may want to install a newer one here
     - name: Install Dependencies
       run: |
         apt-get update
@@ -45,6 +38,9 @@ jobs:
     #
     - name: Configure git
       run: git config --global --add safe.directory `pwd`
+
+    - name: Print git log
+      run: git log
 
     # In case of a push event, the commit we care about is simply HEAD.
     # The current branch name can be found by parsing GITHUB_REF, for example,
@@ -91,14 +87,6 @@ jobs:
         echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
-
-    - name: Show stuff
-      run: |
-        pwd
-        ls -al
-
-    - name: Print git log
-      run: git log
 
     - name: Configure
       working-directory: ${{github.workspace}}
