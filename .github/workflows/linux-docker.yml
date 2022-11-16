@@ -36,9 +36,6 @@ jobs:
         apt-get update
         apt-get install -y cmake git
 
-    - name: Print git log
-      run: git log
-
     # In case of a push event, the commit we care about is simply HEAD.
     # The current branch name can be found by parsing GITHUB_REF, for example,
     # if we are on the master branch, then GITHUB_REF = refs/heads/master.
@@ -84,6 +81,14 @@ jobs:
         echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
+
+    - name: Show stuff
+      run: |
+        pwd
+        ls -al
+
+    - name: Print git log
+      run: git log
 
     - name: Configure
       working-directory: ${{github.workspace}}
