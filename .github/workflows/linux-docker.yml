@@ -34,7 +34,7 @@ jobs:
     - name: Install Dependencies
       run: |
         apt-get update
-        apt-get install cmake git
+        apt-get install -y cmake git
 
     - name: Print git log
       run: git log
