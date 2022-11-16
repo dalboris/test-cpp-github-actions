@@ -1,0 +1,23 @@
+name: Ubuntu 18.04 (Docker Minimal)
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        apt-get update
+        apt-get install -y cmake build-essential libfreetype6-dev
+
+    - name: Build
+      working-directory: ${{github.workspace}}
+      run: |
+        mkdir build
+        cd build
+        cmake --version
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake --build .
