@@ -19,6 +19,7 @@ jobs:
         apt-get update
         apt-get install -y software-properties-common  # for add-apt-repository
         add-apt-repository ppa:git-core/ppa            # we need git 2.18+ (default is 2.17)
+        apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
         apt-get update
         apt-get install -y git cmake build-essential libfreetype6-dev
 
