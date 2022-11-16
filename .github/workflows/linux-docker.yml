@@ -35,7 +35,7 @@ jobs:
       run: ls -al
 
     - name: Install Dependencies
-      run: sudo apt install cmake
+      run: apt install cmake
 
     # In case of a push event, the commit we care about is simply HEAD.
     # The current branch name can be found by parsing GITHUB_REF, for example,
