@@ -6,6 +6,8 @@ env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
+  VCPKG_DEPENDENCIES: freetype
+  # TODO: support several dependencies and/or parse from vcpkg.json
 
 defaults:
   run:
@@ -92,12 +94,18 @@ jobs:
         #echo "VCPKG_ROOT=$(echo "$github_workspace_parent/vcpkg")" >> $GITHUB_ENV
         #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "$github_workspace_parent/vcpkg/archives")" >> $GITHUB_ENV
 
+    # Set an explicit version of CMake to test vcpkg binary caching
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.16.x'
+
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: cache-vcpkg-VCPKG_VERSION=${{env.VCPKG_VERSION}}-MSVC_VERSION=${{env.MSVC_VERSION}}-MANIFEST_FILE_HASH=${{hashFiles('vcpkg.json')}}
+        key: vcpkg=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-deps=${{env.VCPKG_DEPENDENCIES}}
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Clone and bootstrap vcpkg
@@ -141,7 +149,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS=--x-abi-tools-use-exact-versions -DVCPKG_DISABLE_COMPILER_TRACKING=ON
 
     - name: Build
       working-directory: ${{github.workspace}}/build
