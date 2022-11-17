@@ -95,10 +95,10 @@ jobs:
         #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "$github_workspace_parent/vcpkg/archives")" >> $GITHUB_ENV
 
     # Set an explicit version of CMake to test vcpkg binary caching
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v1.13
-      with:
-        cmake-version: '3.17.x'
+    # - name: Setup cmake
+    #   uses: jwlawson/actions-setup-cmake@v1.13
+    #   with:
+    #     cmake-version: '3.17.x'
 
     - name: Cache vcpkg
       id: cache-vcpkg
