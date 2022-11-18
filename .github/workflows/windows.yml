@@ -6,12 +6,9 @@ env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
-  VCPKG_DEPENDENCIES: freetype
   VCPKG_INSTALL_OPTIONS: --x-abi-tools-use-exact-versions
   VCPKG_BUILD_TYPE: release
   VCPKG_DISABLE_COMPILER_TRACKING: ON
-
-  # TODO: support several dependencies and/or parse from vcpkg.json
 
 defaults:
   run:
@@ -88,30 +85,24 @@ jobs:
     # For documentation on binary caching, see:
     #    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
     #
-    - name: Prepare vckpg
+    - name: Configure vckpg
       run: |
         echo "VCPKG_ROOT_PARENT=${{github.workspace}}" >> $GITHUB_ENV
         echo "VCPKG_ROOT=${{github.workspace}}/vcpkg" >> $GITHUB_ENV
         echo "VCPKG_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
-        echo "VCPKG_OVERLAY_TRIPLETS=${{github.workspace}}/custom-triplets" >> $GITHUB_ENV
+        echo "VCPKG_OVERLAY_TRIPLETS=${{github.workspace}}/vcpkg/custom-triplets" >> $GITHUB_ENV
         echo "VCPKG_DEFAULT_TRIPLET=vgc-x64-windows" >> $GITHUB_ENV
         echo "VCPKG_DEFAULT_BINARY_CACHE=${{github.workspace}}/vcpkg/archives" >> $GITHUB_ENV
 
-    # Set an explicit version of CMake to test vcpkg binary caching
-    # - name: Setup cmake
-    #   uses: jwlawson/actions-setup-cmake@v1.13
-    #   with:
-    #     cmake-version: '3.17.x'
-
-    # - name: Cache vcpkg
-    #   id: cache-vcpkg
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: ${{env.VCPKG_ROOT}}
-    #     key: vcpkg2=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-deps=${{env.VCPKG_DEPENDENCIES}}
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v3
+      with:
+        path: ${{env.VCPKG_ROOT}}
+        key: vcpkg=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-deps=${{env.VCPKG_DEPENDENCIES}}
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Setup vcpkg
+      name: Bootstrap vcpkg and install packages (if cache miss)
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
         mkdir "$VCPKG_OVERLAY_TRIPLETS"
@@ -124,22 +115,7 @@ jobs:
         echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> "$TRIPLET_FILE"
         cat "$TRIPLET_FILE"
         cmd.exe /c bootstrap-vcpkg.bat
-
-    # This step is optional since it would be done by CMake anyway, but it's nice to have it as
-    # a separate step in order to keep its timing and/or failure separate from CMake Configure
-    - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Install vcpkg packages
-      working-directory: ${{env.VCPKG_ROOT}}
-      run: |
-        echo "$VCPKG_ROOT"
-        echo "$VCPKG_OVERLAY_TRIPLETS"
-        echo "$VCPKG_DEFAULT_TRIPLET"
         vcpkg.exe --vcpkg-root="$VCPKG_ROOT" --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" --triplet="$VCPKG_DEFAULT_TRIPLET" $VCPKG_INSTALL_OPTIONS install
-
-    # - name: List vcpkg installed packaged
-    #   working-directory: ${{env.VCPKG_ROOT}}
-    #   run: |
-    #     ./vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
