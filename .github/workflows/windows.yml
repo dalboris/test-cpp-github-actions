@@ -110,26 +110,25 @@ jobs:
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Clone and bootstrap vcpkg
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
-      shell: cmd
       run: |
-        git clone --depth=1 --branch "%VCPKG_VERSION%" https://github.com/microsoft/vcpkg.git
+        git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         cd vcpkg
         mkdir archives
-        .\bootstrap-vcpkg.bat
+        cmd.exe /c bootstrap-vcpkg.bat
 
     # This step is optional since it would be done by CMake anyway, but it's nice to have it as
     # a separate step in order to keep its timing and/or failure separate from CMake Configure
-    - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Install vcpkg packages
-      working-directory: ${{env.VCPKG_ROOT}}
-      shell: cmd
-      run: |
-        .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install
+    # - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
+    #   name: Install vcpkg packages
+    #   working-directory: ${{env.VCPKG_ROOT}}
+    #   shell: cmd
+    #   run: |
+    #     .\vcpkg.exe --vcpkg-root="%VCPKG_ROOT%" --triplet=x64-windows install
 
-    - name: List vcpkg installed packaged
-      working-directory: ${{env.VCPKG_ROOT}}
-      run: |
-        ./vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
+    # - name: List vcpkg installed packaged
+    #   working-directory: ${{env.VCPKG_ROOT}}
+    #   run: |
+    #     ./vcpkg.exe --vcpkg-root="$VCPKG_ROOT" list
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
@@ -149,7 +148,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS=--x-abi-tools-use-exact-versions -DVCPKG_DISABLE_COMPILER_TRACKING=ON
 
     - name: Build
       working-directory: ${{github.workspace}}/build
