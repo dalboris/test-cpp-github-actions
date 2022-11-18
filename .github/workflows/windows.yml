@@ -7,7 +7,9 @@ env:
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
   VCPKG_DEPENDENCIES: freetype
-  VCPKG_DEFAULT_TRIPLET: vgc-x64-triplet
+  VCPKG_INSTALL_OPTIONS: --x-abi-tools-use-exact-versions
+  VCPKG_DISABLE_COMPILER_TRACKING: ON
+
   # TODO: support several dependencies and/or parse from vcpkg.json
 
 defaults:
@@ -89,6 +91,7 @@ jobs:
       run: |
         echo "VCPKG_ROOT_PARENT=${{github.workspace}}" >> $GITHUB_ENV
         echo "VCPKG_ROOT=${{github.workspace}}/vcpkg" >> $GITHUB_ENV
+        echo "VCPKG_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
         echo "VCPKG_DEFAULT_TRIPLET=vgc-x64-windows" >> $GITHUB_ENV
         echo "VCPKG_DEFAULT_BINARY_CACHE=${{github.workspace}}/vcpkg/archives" >> $GITHUB_ENV
 
@@ -114,6 +117,7 @@ jobs:
         mkdir archives
         cd triplets
         cp x64-windows.cmake vgc-x64-windows.cmake
+        echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> x64-windows.cmake
         cat vgc-x64-windows.cmake
         cd ..
         cmd.exe /c bootstrap-vcpkg.bat
@@ -149,10 +153,8 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS=--x-abi-tools-use-exact-versions
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: cmake --build .
-
-
