@@ -117,7 +117,7 @@ jobs:
         mkdir archives
         cd triplets
         cp x64-windows.cmake vgc-x64-windows.cmake
-        echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> x64-windows.cmake
+        echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> vgc-x64-windows.cmake
         cat vgc-x64-windows.cmake
         cd ..
         cmd.exe /c bootstrap-vcpkg.bat
