@@ -131,7 +131,7 @@ jobs:
       name: Install vcpkg packages
       working-directory: ${{env.VCPKG_ROOT}}
       run: |
-        .\vcpkg.exe --vcpkg-root="$VCPKG_ROOT" --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" --triplet="$VCPKG_DEFAULT_TRIPLET" install
+        vcpkg.exe --vcpkg-root="$VCPKG_ROOT" --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" --triplet="$VCPKG_DEFAULT_TRIPLET" install
 
     # - name: List vcpkg installed packaged
     #   working-directory: ${{env.VCPKG_ROOT}}
