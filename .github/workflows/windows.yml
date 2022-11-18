@@ -8,6 +8,7 @@ env:
   VCPKG_VERSION: 2022.05.10
   VCPKG_DEPENDENCIES: freetype
   VCPKG_INSTALL_OPTIONS: --x-abi-tools-use-exact-versions
+  VCPKG_BUILD_TYPE: release
   VCPKG_DISABLE_COMPILER_TRACKING: ON
 
   # TODO: support several dependencies and/or parse from vcpkg.json
@@ -116,9 +117,10 @@ jobs:
         cd vcpkg
         mkdir archives
         cd triplets
-        cp x64-windows.cmake vgc-x64-windows.cmake
-        echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> vgc-x64-windows.cmake
-        cat vgc-x64-windows.cmake
+        cp x64-windows.cmake $VCPKG_DEFAULT_TRIPLET.cmake
+        echo "set(VCPKG_BUILD_TYPE $VCPKG_BUILD_TYPE)" >> $VCPKG_DEFAULT_TRIPLET.cmake
+        echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> $VCPKG_DEFAULT_TRIPLET.cmake
+        cat $VCPKG_DEFAULT_TRIPLET.cmake
         cd ..
         cmd.exe /c bootstrap-vcpkg.bat
 
@@ -153,7 +155,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS"
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" -VCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET" -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
