@@ -7,6 +7,7 @@ env:
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
   VCPKG_DEPENDENCIES: freetype
+  VCPKG_DEFAULT_TRIPLET: vgc-x64-triplet
   # TODO: support several dependencies and/or parse from vcpkg.json
 
 defaults:
@@ -84,15 +85,12 @@ jobs:
     # For documentation on binary caching, see:
     #    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
     #
-    - name: Setup vckpg environment variables
+    - name: Prepare vckpg
       run: |
-        echo "VCPKG_ROOT_PARENT=$(echo "${{github.workspace}}")" >> $GITHUB_ENV
-        echo "VCPKG_ROOT=$(echo "${{github.workspace}}/vcpkg")" >> $GITHUB_ENV
-        echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "${{github.workspace}}/vcpkg/archives")" >> $GITHUB_ENV
-        #github_workspace_parent="$(dirname "${{github.workspace}}")"
-        #echo "VCPKG_ROOT_PARENT=$(echo "$github_workspace_parent")" >> $GITHUB_ENV
-        #echo "VCPKG_ROOT=$(echo "$github_workspace_parent/vcpkg")" >> $GITHUB_ENV
-        #echo "VCPKG_DEFAULT_BINARY_CACHE=$(echo "$github_workspace_parent/vcpkg/archives")" >> $GITHUB_ENV
+        echo "VCPKG_ROOT_PARENT=${{github.workspace}}" >> $GITHUB_ENV
+        echo "VCPKG_ROOT=${{github.workspace}}/vcpkg" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_TRIPLET=vgc-x64-windows" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_BINARY_CACHE=${{github.workspace}}/vcpkg/archives" >> $GITHUB_ENV
 
     # Set an explicit version of CMake to test vcpkg binary caching
     # - name: Setup cmake
@@ -100,20 +98,24 @@ jobs:
     #   with:
     #     cmake-version: '3.17.x'
 
-    - name: Cache vcpkg
-      id: cache-vcpkg
-      uses: actions/cache@v3
-      with:
-        path: ${{env.VCPKG_ROOT}}
-        key: vcpkg2=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-deps=${{env.VCPKG_DEPENDENCIES}}
+    # - name: Cache vcpkg
+    #   id: cache-vcpkg
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ${{env.VCPKG_ROOT}}
+    #     key: vcpkg2=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-deps=${{env.VCPKG_DEPENDENCIES}}
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Clone and bootstrap vcpkg
+      name: Setup vcpkg
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         cd vcpkg
         mkdir archives
+        cd triplet
+        cp x64-windows.cmake vgc-x64-windows.cmake
+        cat vgc-x64-windows.cmake
+        cd ..
         cmd.exe /c bootstrap-vcpkg.bat
 
     # This step is optional since it would be done by CMake anyway, but it's nice to have it as
@@ -144,11 +146,10 @@ jobs:
     - name: Configure
       working-directory: ${{github.workspace}}
       run: |
-        echo "vcpkg root = $VCPKG_ROOT"
         mkdir build
         cd build
         cmake --version
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS=--x-abi-tools-use-exact-versions -DVCPKG_DISABLE_COMPILER_TRACKING=ON
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_INSTALL_OPTIONS=--x-abi-tools-use-exact-versions
 
     - name: Build
       working-directory: ${{github.workspace}}/build
