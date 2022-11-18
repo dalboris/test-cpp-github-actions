@@ -112,7 +112,7 @@ jobs:
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         cd vcpkg
         mkdir archives
-        cd triplet
+        cd triplets
         cp x64-windows.cmake vgc-x64-windows.cmake
         cat vgc-x64-windows.cmake
         cd ..
