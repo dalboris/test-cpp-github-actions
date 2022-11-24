@@ -92,14 +92,15 @@ jobs:
         echo "VCPKG_ROOT_PARENT=$PARENT" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$PARENT/vcpkg" >> $GITHUB_ENV
         echo "VCPKG_TOOLCHAIN_FILE=$PARENT/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
-        echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
+        echo "VCPKG_OVERLAY_TRIPLETS=$PARENT/vcpkg/custom-triplets" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_TRIPLET=x64-windows-rel" >> $GITHUB_ENV
 
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: vcpkg=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-packages=freetype
+        key: vcpkg=${{env.VCPKG_VERSION}}-triplet=${{env.VCPKG_DEFAULT_TRIPLET}}-msvc=${{env.MSVC_VERSION}}-packages=freetype
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Bootstrap vcpkg and install packages (if cache miss)
@@ -107,8 +108,13 @@ jobs:
       run: |
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         cd vcpkg
+        mkdir "$VCPKG_OVERLAY_TRIPLETS"
+        TRIPLET_FILE="$VCPKG_OVERLAY_TRIPLETS/$VCPKG_DEFAULT_TRIPLET.cmake"
+        cp triplets/x64-windows.cmake "$TRIPLET_FILE"
+        echo "set(VCPKG_BUILD_TYPE $VCPKG_BUILD_TYPE)" >> "$TRIPLET_FILE"
         vcpkg.exe \
           --vcpkg-root="$VCPKG_ROOT" \
+          --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" \
           --triplet="$VCPKG_DEFAULT_TRIPLET" \
           $VCPKG_INSTALL_OPTIONS \
           install freetype
@@ -134,8 +140,9 @@ jobs:
           -G Ninja \
           -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" \
-          -DVCPKG_MANIFEST_MODE=OFF \
-          -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET"
+          -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" \
+          -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET" \
+          -DVCPKG_MANIFEST_MODE=OFF
 
     - name: Build
       working-directory: ${{github.workspace}}/build
