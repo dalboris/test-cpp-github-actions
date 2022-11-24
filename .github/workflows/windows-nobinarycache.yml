@@ -6,7 +6,7 @@ env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
   VCPKG_VERSION: 2022.05.10
-  VCPKG_INSTALL_OPTIONS: --x-abi-tools-use-exact-versions
+  VCPKG_INSTALL_OPTIONS: --binarysource=clear
   VCPKG_BUILD_TYPE: release
   VCPKG_DISABLE_COMPILER_TRACKING: ON
 
@@ -90,16 +90,14 @@ jobs:
         echo "VCPKG_ROOT_PARENT=${{github.workspace}}" >> $GITHUB_ENV
         echo "VCPKG_ROOT=${{github.workspace}}/vcpkg" >> $GITHUB_ENV
         echo "VCPKG_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
-        echo "VCPKG_OVERLAY_TRIPLETS=${{github.workspace}}/vcpkg/custom-triplets" >> $GITHUB_ENV
-        echo "VCPKG_DEFAULT_TRIPLET=vgc-x64-windows" >> $GITHUB_ENV
-        echo "VCPKG_DEFAULT_BINARY_CACHE=${{github.workspace}}/vcpkg/archives" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
 
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: vcpkg=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-json=${{hashFiles('vcpkg.json')}}
+        key: vcpkg=${{env.VCPKG_VERSION}}-msvc=${{env.MSVC_VERSION}}-packages=freetype
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Bootstrap vcpkg and install packages (if cache miss)
@@ -116,10 +114,9 @@ jobs:
         cmd.exe /c bootstrap-vcpkg.bat
         vcpkg.exe \
           --vcpkg-root="$VCPKG_ROOT" \
-          --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" \
           --triplet="$VCPKG_DEFAULT_TRIPLET" \
           $VCPKG_INSTALL_OPTIONS \
-          install
+          install freetype
 
     - name: Setup Developer Command Prompt for VS
       uses: ilammy/msvc-dev-cmd@v1
@@ -142,7 +139,7 @@ jobs:
           -G Ninja \
           -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" \
-          -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" \
+          -DVCPKG_MANIFEST_MODE=OFF \
           -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET" \
           -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS"
 
