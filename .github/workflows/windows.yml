@@ -144,7 +144,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" \
           -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" \
           -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET" \
-          -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS"
+          -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS;--debug"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
