@@ -88,7 +88,7 @@ jobs:
     - name: Configure vckpg
       working-directory: ${{github.workspace}}
       run: |
-        PARENT=${{github.workspace}}/..
+        PARENT="${{github.workspace}}/.."
         echo "VCPKG_ROOT_PARENT=$PARENT" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$PARENT/vcpkg" >> $GITHUB_ENV
         echo "VCPKG_TOOLCHAIN_FILE=$PARENT/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
