@@ -1,0 +1,148 @@
+name: Windows (No Manifest Mode)
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+  MSVC_VERSION: 2019
+  VCPKG_VERSION: 2022.05.10
+  VCPKG_INSTALL_OPTIONS: --binarysource=clear
+  VCPKG_BUILD_TYPE: release
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+
+    # By default, actions/checkout will only check out the last commit. For
+    # pull requests, this is a temporary merge commit used to test integration
+    # against the master branch. Thefore, in order to get the actuall commit
+    # message we are interested in, we need to fetch more than one commit.
+    # Getting more commits can also be helpful for computing human-readable
+    # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 100
+
+    - name: Print git log
+      run: git log
+
+    # In case of a push event, the commit we care about is simply HEAD.
+    # The current branch name can be found by parsing GITHUB_REF, for example,
+    # if we are on the master branch, then GITHUB_REF = refs/heads/master.
+    - name: Get commit branch and commit message
+      if: github.event_name == 'push'
+      run: |
+        echo "COMMIT_BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "$(git log --format=%B -n 1 HEAD)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # In case of a pull_request event, the commit we care about is HEAD^2, that
+    # is, the second parent of the pull request merge commit.
+    # The current branch name is directly given by GITHUB_HEAD_REF
+    - name: Get commit branch and commit message
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "COMMIT_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+        echo "$(git log --format=%B -n 1 HEAD^2)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables
+    - name: Print useful environment variables
+      if:
+      run: |
+        echo "GITHUB_WORKFLOW:      $GITHUB_WORKFLOW"
+        echo "GITHUB_RUN_ID:        $GITHUB_RUN_ID"
+        echo "GITHUB_RUN_NUMBER:    $GITHUB_RUN_NUMBER"
+        echo "GITHUB_ACTION:        $GITHUB_ACTION"
+        echo "GITHUB_ACTIONS:       $GITHUB_ACTIONS"
+        echo "GITHUB_ACTOR:         $GITHUB_ACTOR"
+        echo "GITHUB_REPOSITORY:    $GITHUB_REPOSITORY"
+        echo "GITHUB_EVENT_NAME:    $GITHUB_EVENT_NAME"
+        echo "GITHUB_EVENT_PATH:    $GITHUB_EVENT_PATH"
+        echo "GITHUB_WORKSPACE:     $GITHUB_WORKSPACE"
+        echo "GITHUB_SHA:           $GITHUB_SHA"
+        echo "GITHUB_REF:           $GITHUB_REF"
+        echo "GITHUB_HEAD_REF:      $GITHUB_HEAD_REF"
+        echo "GITHUB_BASE_REF:      $GITHUB_BASE_REF"
+        echo "GITHUB_SERVER_URL:    $GITHUB_SERVER_URL"
+        echo "GITHUB_API_URL:       $GITHUB_API_URL"
+        echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
+        echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
+        echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
+
+    # We need VCPKG_DEFAULT_BINARY_CACHE otherwise it would use:
+    #     C:\Users\runneradmin\AppData\Local\vcpkg\archives\
+    #
+    # For documentation on binary caching, see:
+    #    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
+    #
+    - name: Configure vckpg
+      working-directory: ${{github.workspace}}
+      run: |
+        cd ..
+        PARENT="$(cmd //c cd)"
+        echo "VCPKG_ROOT_PARENT=$PARENT" >> $GITHUB_ENV
+        echo "VCPKG_ROOT=$PARENT/vcpkg" >> $GITHUB_ENV
+        echo "VCPKG_TOOLCHAIN_FILE=$PARENT/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
+        echo "VCPKG_OVERLAY_TRIPLETS=$PARENT/vcpkg/custom-triplets" >> $GITHUB_ENV
+        echo "VCPKG_DEFAULT_TRIPLET=x64-windows-rel" >> $GITHUB_ENV
+
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v3
+      with:
+        path: ${{env.VCPKG_ROOT}}
+        key: vcpkg=${{env.VCPKG_VERSION}}-triplet=${{env.VCPKG_DEFAULT_TRIPLET}}-msvc=${{env.MSVC_VERSION}}-packages=freetype
+
+    - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
+      name: Bootstrap vcpkg and install packages (if cache miss)
+      working-directory: ${{env.VCPKG_ROOT_PARENT}}
+      run: |
+        git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        mkdir "$VCPKG_OVERLAY_TRIPLETS"
+        TRIPLET_FILE="$VCPKG_OVERLAY_TRIPLETS/$VCPKG_DEFAULT_TRIPLET.cmake"
+        cp triplets/x64-windows.cmake "$TRIPLET_FILE"
+        echo "set(VCPKG_BUILD_TYPE $VCPKG_BUILD_TYPE)" >> "$TRIPLET_FILE"
+        vcpkg.exe \
+          --vcpkg-root="$VCPKG_ROOT" \
+          --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" \
+          --triplet="$VCPKG_DEFAULT_TRIPLET" \
+          $VCPKG_INSTALL_OPTIONS \
+          install freetype
+
+    - name: Setup Developer Command Prompt for VS
+      uses: ilammy/msvc-dev-cmd@v1
+
+    # For documentation on what vcpkg options can be given to CMake, see:
+    #    https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html
+    #
+    # Examples:
+    #  - -DVCPKG_INSTALL_OPTIONS="--debug;--binarysource=clear"
+    #  - -DVCPKG_INSTALLED_DIR="$VCPKG_ROOT/installed"
+    #  - -DVCPKG_MANIFEST_MODE=OFF
+    #
+    - name: Configure
+      working-directory: ${{github.workspace}}
+      run: |
+        mkdir build
+        cd build
+        cmake --version
+        cmake .. \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+          -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" \
+          -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET" \
+          -DVCPKG_MANIFEST_MODE=OFF
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build .
