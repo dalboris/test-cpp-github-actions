@@ -8,7 +8,6 @@ env:
   VCPKG_VERSION: 2022.05.10
   VCPKG_INSTALL_OPTIONS: --binarysource=clear
   VCPKG_BUILD_TYPE: release
-  VCPKG_DISABLE_COMPILER_TRACKING: ON
 
 defaults:
   run:
@@ -88,7 +87,9 @@ jobs:
     - name: Configure vckpg
       working-directory: ${{github.workspace}}
       run: |
-        PARENT="${{github.workspace}}/.."
+        #PARENT="${{github.workspace}}/.."
+        cd ..
+        PARENT="$PWD"
         echo "VCPKG_ROOT_PARENT=$PARENT" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$PARENT/vcpkg" >> $GITHUB_ENV
         echo "VCPKG_TOOLCHAIN_FILE=$PARENT/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
@@ -135,8 +136,7 @@ jobs:
           -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" \
           -DVCPKG_MANIFEST_MODE=OFF \
-          -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET" \
-          -DVCPKG_INSTALL_OPTIONS="$VCPKG_INSTALL_OPTIONS"
+          -DVCPKG_TARGET_TRIPLET="$VCPKG_DEFAULT_TRIPLET"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
