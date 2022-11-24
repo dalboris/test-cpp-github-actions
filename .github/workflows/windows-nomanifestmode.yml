@@ -1,4 +1,4 @@
-name: Windows
+name: Windows (No Manifest Mode)
 
 on: [push, pull_request]
 
@@ -105,13 +105,6 @@ jobs:
       run: |
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
         cd vcpkg
-        mkdir archives
-        mkdir "$VCPKG_OVERLAY_TRIPLETS"
-        TRIPLET_FILE="$VCPKG_OVERLAY_TRIPLETS/$VCPKG_DEFAULT_TRIPLET.cmake"
-        cp triplets/x64-windows.cmake "$TRIPLET_FILE"
-        echo "set(VCPKG_BUILD_TYPE $VCPKG_BUILD_TYPE)" >> "$TRIPLET_FILE"
-        echo "set(VCPKG_DISABLE_COMPILER_TRACKING $VCPKG_DISABLE_COMPILER_TRACKING)" >> "$TRIPLET_FILE"
-        cmd.exe /c bootstrap-vcpkg.bat
         vcpkg.exe \
           --vcpkg-root="$VCPKG_ROOT" \
           --triplet="$VCPKG_DEFAULT_TRIPLET" \
