@@ -101,7 +101,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{env.VCPKG_ROOT}}
-        key: vcpkg=${{env.VCPKG_VERSION}}_triplet=${{env.VCPKG_DEFAULT_TRIPLET}}_msvc=${{env.MSVC_VERSION}}_packages=${{env.VCPKG_PACKAGES}}
+        key: vcpkg=${{env.VCPKG_VERSION}} triplet=${{env.VCPKG_DEFAULT_TRIPLET}} msvc=${{env.MSVC_VERSION}} packages=${{env.VCPKG_PACKAGES}}
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
       name: Bootstrap vcpkg and install packages (if cache miss)
@@ -109,6 +109,9 @@ jobs:
       run: |
         # Download vcpkg
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
+
+        # Bootstrap
+        cmd.exe /c bootstrap-vcpkg.bat
 
         # Create custom triplet that only compile binaries with the given VCPKG_BUILD_TYPE
         cd vcpkg
