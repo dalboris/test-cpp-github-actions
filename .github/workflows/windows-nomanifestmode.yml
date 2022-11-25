@@ -79,12 +79,6 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
-    # We need VCPKG_DEFAULT_BINARY_CACHE otherwise it would use:
-    #     C:\Users\runneradmin\AppData\Local\vcpkg\archives\
-    #
-    # For documentation on binary caching, see:
-    #    https://github.com/microsoft/vcpkg/blob/master/docs/users/binarycaching.md
-    #
     - name: Configure vckpg
       working-directory: ${{github.workspace}}
       run: |
