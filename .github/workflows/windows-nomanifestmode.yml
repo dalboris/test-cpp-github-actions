@@ -5,10 +5,10 @@ on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
-  VCPKG_VERSION: 2022.05.10
+  VCPKG_VERSION: 2022.10.19
   VCPKG_INSTALL_OPTIONS: --binarysource=clear
   VCPKG_BUILD_TYPE: release
-  VCPKG_PACKAGES: freetype;fmt
+  VCPKG_PACKAGES: freetype;harfbuzz
 
 defaults:
   run:
@@ -116,7 +116,7 @@ jobs:
 
         # Install packages
         # Note: "IFS" = Input Field Separators. Makes it possible to interpret ';' as argument separator.
-        #       We surround the command by parentheseses so that IFS is only redefined in a subshell.
+        #       We surround the command by parentheses so that IFS is only redefined in a subshell.
         (IFS=';'; vcpkg.exe \
           --vcpkg-root="$VCPKG_ROOT" \
           --overlay-triplets="$VCPKG_OVERLAY_TRIPLETS" \
