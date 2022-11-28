@@ -82,9 +82,7 @@ jobs:
     - name: Configure vckpg
       working-directory: ${{github.workspace}}
       run: |
-        cd ..
-        PARENT="$(cmd //c cd)" # Current folder in 'D:\...' format (pwd would do '/d/...')
-        echo "VCPKG_ROOT_PARENT=$PARENT" >> $GITHUB_ENV
+        echo "VCPKG_ROOT_PARENT=${{github.workspace}}" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$PARENT/vcpkg" >> $GITHUB_ENV
         echo "VCPKG_TOOLCHAIN_FILE=$PARENT/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
         echo "VCPKG_OVERLAY_TRIPLETS=$PARENT/vcpkg/custom-triplets" >> $GITHUB_ENV
@@ -101,6 +99,9 @@ jobs:
       name: Bootstrap vcpkg and install packages (if cache miss)
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
+        # Delete manifest file, otherwise, we cannot manually install packages
+        rm "${{github.workspace}}/vcpkg.json"
+
         # Download vcpkg
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
 
