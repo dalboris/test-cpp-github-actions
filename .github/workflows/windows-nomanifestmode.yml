@@ -83,6 +83,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         cd ..
+        mkdir vcpkg
         PARENT="$(cmd //c cd)" # Current folder in 'D:\...' format (pwd would do '/d/...')
         echo "VCPKG_ROOT_PARENT=$PARENT" >> $GITHUB_ENV
         echo "VCPKG_ROOT=$PARENT/vcpkg" >> $GITHUB_ENV
