@@ -35,16 +35,6 @@ jobs:
         apt-get update
         apt-get install -y cmake
 
-    - name: Install Qt
-      run: |
-        pwd
-        wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
-        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C "$GITHUB_WORKSPACE"
-        ls -al $GITHUB_WORKSPACE/
-        ls -al $GITHUB_WORKSPACE/qt
-        ls -al $GITHUB_WORKSPACE/qt/$QT_VERSION
-        ls -al $GITHUB_WORKSPACE/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5
-
     - name: Install Other Dependencies
       run: |
         apt-get install -y build-essential libfreetype6-dev
@@ -114,6 +104,16 @@ jobs:
         echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
+
+    - name: Install Qt
+      run: |
+        pwd
+        wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
+        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C "$GITHUB_WORKSPACE"
+        ls -al $GITHUB_WORKSPACE/
+        ls -al $GITHUB_WORKSPACE/qt
+        ls -al $GITHUB_WORKSPACE/qt/$QT_VERSION
+        ls -al $GITHUB_WORKSPACE/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5
 
     - name: Configure
       working-directory: ${{github.workspace}}
