@@ -37,8 +37,13 @@ jobs:
 
     - name: Install Qt
       run: |
+        pwd
         wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
         tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C "$GITHUB_WORKSPACE"
+        ls -al $GITHUB_WORKSPACE/
+        ls -al $GITHUB_WORKSPACE/qt
+        ls -al $GITHUB_WORKSPACE/qt/$QT_VERSION
+        ls -al $GITHUB_WORKSPACE/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5
 
     - name: Install Other Dependencies
       run: |
@@ -114,6 +119,10 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         pwd
+        ls -al
+        ls -al qt
+        ls -al qt/$QT_VERSION
+        ls -al qt/$QT_VERSION/gcc_64/lib/cmake/Qt5
         mkdir build
         cd build
         cmake --version
