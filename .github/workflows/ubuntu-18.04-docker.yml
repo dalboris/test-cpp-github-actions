@@ -37,12 +37,8 @@ jobs:
 
     - name: Install Qt
       run: |
-        echo "THIS_WORKSPACE=$(pwd)" >> $GITHUB_ENV
-        pwd
-        echo ${{github.workspace}}
-        echo "GITHUB_WORKSPACE:     $GITHUB_WORKSPACE"
         wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
-        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C ${{github.workspace}}
+        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C "$GITHUB_WORKSPACE"
 
     - name: Install Other Dependencies
       run: |
@@ -84,6 +80,13 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
 
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables
+    #
+    # Note: in a Docker container, we have:
+    # - ${{github.workspace}} = /home/runner/work/test-cpp-github-actions/test-cpp-github-actions
+    # - $GITHUB_WORKSPACE     = /__w/test-cpp-github-actions/test-cpp-github-actions
+    #
+    # It's best to use ${{github.workspace}} in `working-directory`, and $GITHUB_WORKSPACE in `run`
+    #
     - name: Print useful environment variables
       if:
       run: |
@@ -114,7 +117,7 @@ jobs:
         mkdir build
         cd build
         cmake --version
-        cmake .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+        cmake .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DQt5_DIR="$GITHUB_WORKSPACE/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
