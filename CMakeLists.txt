@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.1.0)
 project(foo)
 
 find_package(Freetype REQUIRED)
+
+find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+
 find_package(Qt5 COMPONENTS Core Gui Widgets)
 if(Qt5_FOUND)
     get_filename_component(QT_ROOT ${Qt5_DIR}/../../.. ABSOLUTE)

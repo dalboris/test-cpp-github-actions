@@ -5,6 +5,7 @@ on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   QT_VERSION: 5.12.5
+  PYTHON_VERSION: 3.7
   PARALLEL_JOBS: 5
 
 jobs:
@@ -104,6 +105,14 @@ jobs:
         echo "GITHUB_GRAPHQL_URL:   $GITHUB_GRAPHQL_URL"
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
+
+    # Seup Python
+    #
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{env.PYTHON_VERSION}}
+        architecture: 'x64'
 
     # Note: we need libgl1-mesa-dev for QtGui, otherwise CMake configure step would fail with:
     #   CMake Error at qt/5.12.5/gcc_64/lib/cmake/Qt5Gui/Qt5GuiConfigExtras.cmake:9 (message):
