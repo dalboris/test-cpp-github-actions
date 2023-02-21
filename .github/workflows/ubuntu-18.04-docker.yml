@@ -13,12 +13,6 @@ jobs:
 
     steps:
 
-    - name: Install Qt
-      working-directory: ${{runner.workspace}}
-      run: |
-        wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
-        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C ${{runner.workspace}}
-
     - name: Install and Configure Recent Git
       run: |
         apt-get update
@@ -39,6 +33,12 @@ jobs:
         apt-add-repository "deb https://apt.kitware.com/ubuntu/ bionic main"
         apt-get update
         apt-get install -y cmake
+
+    - name: Install Qt
+      working-directory: ${{runner.workspace}}
+      run: |
+        wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
+        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C ${{runner.workspace}}
 
     - name: Install Other Dependencies
       run: |
