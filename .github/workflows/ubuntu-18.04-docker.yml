@@ -36,10 +36,11 @@ jobs:
         apt-get install -y cmake
 
     - name: Install Qt
-      working-directory: ${{runner.workspace}}
       run: |
+        pwd
+        echo ${{github.workspace}}
         wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
-        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C ${{runner.workspace}}
+        tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C ${{github.workspace}}
 
     - name: Install Other Dependencies
       run: |
