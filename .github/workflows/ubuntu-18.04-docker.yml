@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   BUILD_TYPE: Release
+  QT_VERSION: 5.12.5
   PARALLEL_JOBS: 5
 
 jobs:
