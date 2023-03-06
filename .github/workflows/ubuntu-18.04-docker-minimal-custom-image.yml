@@ -1,4 +1,4 @@
-name: Ubuntu 18.04 (Docker Minimal)
+name: Ubuntu 18.04 (Docker Minimal Custom Image)
 on: [push, pull_request]
 jobs:
   build:
