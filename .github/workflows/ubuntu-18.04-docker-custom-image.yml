@@ -14,6 +14,10 @@ jobs:
 
     steps:
 
+    # Fix "fatal: detected dubious ownership in repository at '/__w/<user>/<repo>'""
+    - name: Add GitHub workspace to Git safe directories
+      run: git config --global --add safe.directory `pwd`
+
     # By default, actions/checkout will only check out the last commit. For
     # pull requests, this is a temporary merge commit used to test integration
     # against the master branch. Therefore, in order to get the actual commit
