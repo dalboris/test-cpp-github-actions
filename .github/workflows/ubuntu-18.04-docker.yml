@@ -106,26 +106,12 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
-    # Setup Python
-    #
-    # - name: Setup Python
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: ${{env.PYTHON_VERSION}}
-    #     architecture: 'x64'
-
     - name: Setup Python
       run: |
-        echo "Python 3:"
-        which python3
-        python3 --version
-
-        echo "Python_INCLUDE_DIRS:"
-        echo $(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")
-        echo "Python_LIBRARIES:"
-        echo $(python3 -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
-
-        ls -la /usr/bin
+        add-apt-repository ppa:deadsnakes/ppa && \
+        apt install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-dev python${PYTHON_VERSION}-distutils && \
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 && \
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 2
 
     # Note: we need libgl1-mesa-dev for QtGui, otherwise CMake configure step would fail with:
     #   CMake Error at qt/5.12.5/gcc_64/lib/cmake/Qt5Gui/Qt5GuiConfigExtras.cmake:9 (message):
@@ -133,21 +119,20 @@ jobs:
     #
     - name: Install Qt
       run: |
-        apt-get install -y libgl1-mesa-dev # We need this for QtGui
+        apt-get install -y libgl1-mesa-dev    # We need this for QtGui
+        apt-get install -y libxkbcommon-x11-0 # We need this for Qt plugins/platforms/libqxcb.so
         wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
         tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C "$GITHUB_WORKSPACE"
 
     - name: Configure
       working-directory: ${{github.workspace}}
       run: |
-
         mkdir build
         cd build
         cmake --version
-        cmake .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DQt5_DIR="$GITHUB_WORKSPACE/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5" -DPython_INCLUDE_DIRS=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") -DPython_LIBRARIES=$(python3 -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+        cmake .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DQt5_DIR="$GITHUB_WORKSPACE/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5"
 
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: |
-          pwd
           cmake --build . --parallel $PARALLEL_JOBS
