@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: dalboris/ubuntu-18.04-test-cpp-github-actions
+    container: dalboris/test-cpp-github-actions-docker-ubuntu-18.04-minimal
     steps:
 
     - uses: actions/checkout@v2
