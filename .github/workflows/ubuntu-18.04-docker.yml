@@ -5,6 +5,7 @@ on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   QT_VERSION: 5.12.5
+  PYTHON_VERSION: 3.7
   PARALLEL_JOBS: 5
 
 jobs:
@@ -105,13 +106,21 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
+    - name: Setup Python
+      run: |
+        add-apt-repository ppa:deadsnakes/ppa && \
+        apt install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-dev python${PYTHON_VERSION}-distutils && \
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 && \
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 2
+
     # Note: we need libgl1-mesa-dev for QtGui, otherwise CMake configure step would fail with:
     #   CMake Error at qt/5.12.5/gcc_64/lib/cmake/Qt5Gui/Qt5GuiConfigExtras.cmake:9 (message):
     #   Failed to find "GL/gl.h" in "/usr/include/libdrm".
     #
     - name: Install Qt
       run: |
-        apt-get install -y libgl1-mesa-dev # We need this for QtGui
+        apt-get install -y libgl1-mesa-dev    # We need this for QtGui
+        apt-get install -y libxkbcommon-x11-0 # We need this for Qt plugins/platforms/libqxcb.so
         wget --progress=dot:giga https://www.vgc.io/releases/qt/opt-qt-$QT_VERSION-gcc_64.tar.gz
         tar -xzf opt-qt-$QT_VERSION-gcc_64.tar.gz -C "$GITHUB_WORKSPACE"
 
@@ -126,5 +135,4 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: |
-          pwd
           cmake --build . --parallel $PARALLEL_JOBS

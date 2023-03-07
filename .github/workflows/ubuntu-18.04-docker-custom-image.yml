@@ -95,5 +95,4 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: |
-          pwd
           cmake --build . --parallel $PARALLEL_JOBS
