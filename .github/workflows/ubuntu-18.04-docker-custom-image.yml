@@ -10,7 +10,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: dalboris/test-cpp-github-actions-docker-ubuntu-18.04-minimal
+    container: dalboris/test-cpp-github-actions-docker-ubuntu-18.04
 
     steps:
 
