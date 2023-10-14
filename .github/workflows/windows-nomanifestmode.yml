@@ -101,10 +101,7 @@ jobs:
       shell: cmd
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
-        # Download vcpkg
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
-
-        # Bootstrap
         cd vcpkg
         .\bootstrap-vcpkg.bat
 
