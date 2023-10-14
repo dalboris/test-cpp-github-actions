@@ -101,6 +101,8 @@ jobs:
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
         # Delete manifest file, otherwise, we cannot manually install packages
+        pwd
+        ls -al
         rm "${{github.workspace}}/vcpkg.json"
 
         # Download vcpkg
