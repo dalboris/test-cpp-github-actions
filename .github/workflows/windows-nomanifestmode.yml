@@ -109,8 +109,11 @@ jobs:
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
 
         # Bootstrap
+        ls -al
         cd vcpkg
-        cmd.exe /c bootstrap-vcpkg.bat
+        echo "$VCPKG_ROOT/bootstrap-vcpkg.bat"
+        cmd.exe /c "$VCPKG_ROOT/bootstrap-vcpkg.bat"
+        ls -al
 
         # Create custom triplet that only compile binaries with the given VCPKG_BUILD_TYPE
         mkdir "$VCPKG_OVERLAY_TRIPLETS"
