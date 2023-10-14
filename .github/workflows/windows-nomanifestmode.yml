@@ -112,6 +112,20 @@ jobs:
         ls -al
         cd vcpkg
         echo "$VCPKG_ROOT/bootstrap-vcpkg.bat"
+        echo "cmd.exe /?"
+        cmd.exe /?
+        echo "cmd /?"
+        cmd /?
+        echo "cmd c cd"
+        cmd /c "cd"
+        echo "cmd C cd"
+        cmd /C "cd"
+        echo "cmd %cd%"
+        cmd /c "%cd%"
+        echo "cmd cd"
+        cmd /C "cd"
+        echo "cmd %cd%"
+        cmd /C "%cd%"
         cmd.exe /c "$VCPKG_ROOT/bootstrap-vcpkg.bat"
         ls -al
 
