@@ -96,8 +96,9 @@ jobs:
         path: ${{env.VCPKG_ROOT}}
         key: v3 vcpkg=${{env.VCPKG_VERSION}} triplet=${{env.VCPKG_DEFAULT_TRIPLET}} msvc=${{env.MSVC_VERSION}} packages=${{env.VCPKG_PACKAGES}}
 
+    # Note: This must be done in a `cmd` shell to properly execute the bootstrap-vcpkg.bat script
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Bootstrap vcpkg
+      name: Install vcpkg
       shell: cmd
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
