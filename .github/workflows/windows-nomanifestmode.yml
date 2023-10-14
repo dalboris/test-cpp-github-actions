@@ -97,34 +97,23 @@ jobs:
         key: v3 vcpkg=${{env.VCPKG_VERSION}} triplet=${{env.VCPKG_DEFAULT_TRIPLET}} msvc=${{env.MSVC_VERSION}} packages=${{env.VCPKG_PACKAGES}}
 
     - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
-      name: Bootstrap vcpkg and install packages (if cache miss)
+      name: Bootstrap vcpkg
+      shell: cmd
       working-directory: ${{env.VCPKG_ROOT_PARENT}}
       run: |
-        # Delete manifest file, otherwise, we cannot manually install packages
-        rm "${{github.workspace}}/vcpkg.json"
-
         # Download vcpkg
         git clone --depth=1 --branch "$VCPKG_VERSION" https://github.com/microsoft/vcpkg.git
 
         # Bootstrap
-        pwd
         cd vcpkg
-        pwd
-        ls -al
+        .\bootstrap-vcpkg.bat
 
-        echo 'Exexuting cmd.exe /C "cd"...'
-        cmd.exe /C "cd"
-        echo 'Done.'
-
-        echo 'Exexuting cmd.exe /D /E:ON /V:OFF /S /C "CALL $VCPKG_ROOT/bootstrap-vcpkg.bat"...'
-        cmd.exe /D /E:ON /V:OFF /S /C "CALL $VCPKG_ROOT/bootstrap-vcpkg.bat"
-        echo 'Done.'
-        ls -al
-
-        echo 'Exexuting cmd.exe "bootstrap-vcpkg.bat"...'
-        cmd.exe /C "bootstrap-vcpkg.bat"
-        echo 'Done.'
-        ls -al
+    - if: ${{ steps.cache-vcpkg.outputs.cache-hit != 'true' }}
+      name: Install vcpkg packages
+      working-directory: ${{env.VCPKG_ROOT}}
+      run: |
+        # Delete manifest file, otherwise, we cannot manually install packages
+        rm "${{github.workspace}}/vcpkg.json"
 
         # Create custom triplet that only compile binaries with the given VCPKG_BUILD_TYPE
         mkdir "$VCPKG_OVERLAY_TRIPLETS"
