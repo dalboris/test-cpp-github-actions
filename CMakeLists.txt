@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(foo)
 
+# Tell CMake where to find our FindFoobar.cmake modules.
+#
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/tools")
+
 # Find Freetype
 #
 message(STATUS "[Freetype]")
