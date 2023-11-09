@@ -23,6 +23,9 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <hb-ft.h>
+#include <hb.h>
+
 namespace foo {
 
 Foo::Foo(int x) :
@@ -30,6 +33,7 @@ Foo::Foo(int x) :
 {
     FT_Library library;
     FT_Init_FreeType(&library);
+    hb_language_get_default();
     FT_Done_FreeType(library);
 }
 
