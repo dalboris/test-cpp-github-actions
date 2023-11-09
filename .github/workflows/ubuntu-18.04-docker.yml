@@ -38,7 +38,8 @@ jobs:
 
     - name: Install Other Dependencies
       run: |
-        apt-get install -y build-essential libfreetype6-dev
+        apt-get update
+        apt-get install -y build-essential libfreetype6-dev libharfbuzz-dev
 
     # By default, actions/checkout will only check out the last commit. For
     # pull requests, this is a temporary merge commit used to test integration

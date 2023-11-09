@@ -89,6 +89,7 @@ jobs:
       working-directory: ${{runner.workspace}}
       run: |
         brew install freetype
+        brew install harfbuzz
 
     - name: Configure
       working-directory: ${{runner.workspace}}

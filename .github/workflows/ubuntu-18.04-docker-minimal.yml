@@ -11,7 +11,7 @@ jobs:
     - name: Install Dependencies
       run: |
         apt-get update
-        apt-get install -y cmake build-essential libfreetype6-dev
+        apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
 
     - name: Build
       working-directory: ${{github.workspace}}

@@ -79,6 +79,11 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libharfbuzz-dev
+
     - name: Configure
       working-directory: ${{github.workspace}}
       run: |
