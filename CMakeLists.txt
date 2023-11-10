@@ -44,6 +44,14 @@ if(NOT HARFBUZZ_VERSION_STRING)
         set(HARFBUZZ_VERSION_STRING "${HARFBUZZ_VERSION_MAJOR}.${HARFBUZZ_VERSION_MINOR}.${HARFBUZZ_VERSION_MICRO}")
     endif()
 endif()
+# Fixes broken HarfBuzz 8.2.2 config file. See: https://github.com/harfbuzz/harfbuzz/issues/4491
+get_target_property(HARBUZZ_LOCATION harfbuzz::harfbuzz LOCATION)
+if(HARBUZZ_LOCATION MATCHES "libharfbuzz\\.0\\.\\.dylib")
+    message(STATUS "Fixing location: libharfbuzz.0..dylib -> libharfbuzz.0.dylib")
+    string(REPLACE "libharfbuzz.0..dylib" "libharfbuzz.0.dylib" HARBUZZ_LOCATION ${HARBUZZ_LOCATION})
+    set_target_properties(harfbuzz::harfbuzz PROPERTIES IMPORTED_LOCATION ${HARBUZZ_LOCATION})
+endif()
+unset(HARBUZZ_LOCATION)
 message(STATUS "Version: ${HARFBUZZ_VERSION_STRING}")
 message(STATUS "") # newline
 
