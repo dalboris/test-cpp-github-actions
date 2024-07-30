@@ -7,6 +7,9 @@ env:
   QT_VERSION: 5.12.5
   PYTHON_VERSION: 3.7
   PARALLEL_JOBS: 5
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+  # https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
+
 
 jobs:
   build:
@@ -47,7 +50,7 @@ jobs:
     # message we are interested in, we need to fetch more than one commit.
     # Getting more commits can also be helpful for computing human-readable
     # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
       with:
         fetch-depth: 100
 

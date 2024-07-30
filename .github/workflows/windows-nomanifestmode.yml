@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
-  VCPKG_VERSION: 2022.10.19
+  VCPKG_VERSION: 2024.07.12
   VCPKG_INSTALL_OPTIONS: --binarysource=clear
   VCPKG_BUILD_TYPE: release
   VCPKG_PACKAGES: freetype;harfbuzz
@@ -26,7 +26,7 @@ jobs:
     # message we are interested in, we need to fetch more than one commit.
     # Getting more commits can also be helpful for computing human-readable
     # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 100
 
