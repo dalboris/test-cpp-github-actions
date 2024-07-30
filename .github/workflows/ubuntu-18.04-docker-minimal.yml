@@ -10,7 +10,7 @@ jobs:
     container: ubuntu:18.04
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
 
     - name: Install Dependencies
       run: |
