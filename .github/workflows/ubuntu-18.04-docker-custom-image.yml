@@ -103,3 +103,10 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
           cmake --build . --parallel $PARALLEL_JOBS
+
+    - name: Upload to GitHub Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifacts
+        path: |
+          $GITHUB_WORKSPACE/*.so
