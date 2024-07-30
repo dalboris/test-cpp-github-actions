@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   MSVC_VERSION: 2019
-  VCPKG_VERSION: 2022.05.10
+  VCPKG_VERSION: 2024.07.12
   VCPKG_INSTALL_OPTIONS: --x-abi-tools-use-exact-versions
   VCPKG_BUILD_TYPE: release
   VCPKG_DISABLE_COMPILER_TRACKING: ON
