@@ -15,6 +15,7 @@ defaults:
 
 jobs:
   build:
+    name: Build
     runs-on: macos-12
 
     steps:
