@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
+    - uses: actions/checkout@v4
 
     - name: Install Dependencies
       uses: addnab/docker-run-action@v3
