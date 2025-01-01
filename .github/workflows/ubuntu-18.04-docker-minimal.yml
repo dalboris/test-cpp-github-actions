@@ -5,12 +5,11 @@ env:
   # Note: unfortunately, we cannot just use `jobs.build.container: ubuntu:18.04`,
   # otherwise we cannot use GitHub-provided actions (checkout, cache, etc.) as
   # they rely on Node20 which isn't available on Ubuntu 18.04.
-  # See: 
+  # See: https://github.com/actions/checkout/issues/1590
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Note:  container: ubuntu:18.04 # We cannot do this since removal of Node16 in 
     steps:
 
     - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
@@ -18,7 +17,7 @@ jobs:
     - name: Install Dependencies
       uses: addnab/docker-run-action@v3
       with:
-        image: ubuntu:18.04
+        image: ${{CONTAINER}}
         run: |
           apt-get update
           apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
