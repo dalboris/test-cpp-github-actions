@@ -29,8 +29,7 @@ jobs:
 
     - name: Build
       run: |
-        docker exec cnt bash -c "mkdir build"
-        docker exec cnt bash -c "cd build"
+        docker exec cnt bash -c "cd /workspace && mkdir build"
         docker exec cnt bash -c "cmake --version"
-        docker exec cnt bash -c "cmake .. -DCMAKE_BUILD_TYPE=Release"
-        docker exec cnt bash -c "cmake --build ."
+        docker exec cnt bash -c "cd /workspace/build && cmake .. -DCMAKE_BUILD_TYPE=Release"
+        docker exec cnt bash -c "cd /workspace/build && cmake --build ."
