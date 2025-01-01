@@ -28,8 +28,11 @@ jobs:
         docker exec cnt bash -c "apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev"
 
     - name: Build
+      env:
+        SCRIPT: |
+          cd /workspace && mkdir build && cd build
+          cmake --version
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build .
       run: |
-        docker exec cnt bash -c "cd /workspace && mkdir build && cd build"
-        docker exec cnt bash -c "cmake --version"
-        docker exec cnt bash -c "cmake .. -DCMAKE_BUILD_TYPE=Release"
-        docker exec cnt bash -c "cmake --build ."
+        docker exec cnt bash -c "$SCRIPT"
