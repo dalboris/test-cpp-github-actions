@@ -39,7 +39,7 @@ Foo::Foo(int x) :
 
 int Foo::x() const
 {
-    return x_;
+    return std::string();
 }
 
 void Foo::setX(int x)
