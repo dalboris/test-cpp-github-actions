@@ -22,11 +22,13 @@ jobs:
           apt-get update
           apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
 
-    # - name: Build
-    #   working-directory: ${{github.workspace}}
-    #   run: |
-    #     mkdir build
-    #     cd build
-    #     cmake --version
-    #     cmake .. -DCMAKE_BUILD_TYPE=Release
-    #     cmake --build .
+    - name: Build
+      uses: addnab/docker-run-action@v3
+      with:
+        image: ${{ env.CONTAINER }}
+        run: |
+          mkdir build
+          cd build
+          cmake --version
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build .
