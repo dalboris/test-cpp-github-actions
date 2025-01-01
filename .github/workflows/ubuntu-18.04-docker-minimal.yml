@@ -20,32 +20,17 @@ jobs:
 
     - name: Start Container
       run: |
-        docker run --name build-container -d -v ${{ github.workspace }}:/workspace $CONTAINER tail -f /dev/null
-
-    # - name: Install Dependencies
-    #   run: |
-    #     docker exec build-container apt-get update
-    #     docker exec build-container apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+        docker run --name c -d -v ${{ github.workspace }}:/workspace $CONTAINER tail -f /dev/null
 
     - name: Install Dependencies
-      uses: addnab/docker-run-action@v3
-      with:
-        image: build-container
-        run: |
-          apt-get update
-          apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+      run: |
+        docker exec c apt-get update
+        docker exec c apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
 
-
-
-          
-
-    # - name: Build
-    #   uses: addnab/docker-run-action@v3
-    #   with:
-    #     image: build-container
-    #     run: |
-    #       mkdir build
-    #       cd build
-    #       cmake --version
-    #       cmake .. -DCMAKE_BUILD_TYPE=Release
-    #       cmake --build .
+    - name: Build
+      run: |
+        docker exec c mkdir build
+        docker exec c cd build
+        docker exec c cmake --version
+        docker exec c cmake .. -DCMAKE_BUILD_TYPE=Release
+        docker exec c cmake --build .
