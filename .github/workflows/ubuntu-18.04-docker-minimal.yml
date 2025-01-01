@@ -17,7 +17,7 @@ jobs:
     - name: Install Dependencies
       uses: addnab/docker-run-action@v3
       with:
-        image: ${{CONTAINER}}
+        image: ${{ env.CONTAINER }}
         run: |
           apt-get update
           apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
