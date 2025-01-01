@@ -1,27 +1,38 @@
 name: Ubuntu 18.04 (Docker Minimal)
 on: [push, pull_request]
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-  # https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
+  CONTAINER: ubuntu:18.04
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ubuntu:18.04
     steps:
 
-    - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
+    - uses: actions/checkout@v4
+
+    # We manually start a container and execute scripts in it instead of using `jobs.build.container`,
+    # otherwise we couldn't use GitHub-provided actions (checkout, cache, etc.) as they rely on Node20
+    # which would not necessarily be available on some containers (e.g., Ubuntu 18.04).
+    #
+    # See: https://github.com/actions/checkout/issues/1590
+    #
+    - name: Start Docker Container
+      run: |
+        docker pull $CONTAINER
+        docker run --name build-container -d -v ${{ github.workspace }}:/workspace $CONTAINER tail -f /dev/null
 
     - name: Install Dependencies
-      run: |
-        apt-get update
-        apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+      env:
+        SCRIPT: |
+          apt-get update
+          apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+      run: docker exec build-container bash -c "$SCRIPT"
 
     - name: Build
-      working-directory: ${{github.workspace}}
-      run: |
-        mkdir build
-        cd build
-        cmake --version
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        cmake --build .
+      env:
+        SCRIPT: |
+          cd /workspace && mkdir build && cd build
+          cmake --version
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build .
+      run: docker exec build-container bash -c "$SCRIPT"

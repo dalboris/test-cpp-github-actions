@@ -1,27 +1,16 @@
 name: Ubuntu 18.04 (Docker Custom Image)
-
 on: [push, pull_request]
-
 env:
+  CONTAINER: dalboris/test-cpp-github-actions-docker-ubuntu-18.04
   BUILD_TYPE: Release
   QT_VERSION: 5.12.5
   PARALLEL_JOBS: 5
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-  # https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: dalboris/test-cpp-github-actions-docker-ubuntu-18.04
-    outputs:
-      artifacts-cache-key: ${{steps.artifacts.outputs.cache-key}}
-
     steps:
-
-    # Fix "fatal: detected dubious ownership in repository at '/__w/<user>/<repo>'""
-    - name: Add GitHub workspace to Git safe directories
-      run: git config --global --add safe.directory `pwd`
 
     # By default, actions/checkout will only check out the last commit. For
     # pull requests, this is a temporary merge commit used to test integration
@@ -29,7 +18,7 @@ jobs:
     # message we are interested in, we need to fetch more than one commit.
     # Getting more commits can also be helpful for computing human-readable
     # commit ID, such as 2020-12-16.3 for the 4th commit of the day.
-    - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 100
 
@@ -89,83 +78,41 @@ jobs:
         echo "COMMIT_BRANCH:        $COMMIT_BRANCH"
         echo "COMMIT_MESSAGE:       $COMMIT_MESSAGE"
 
-    - name: Install Dependencies
+    # We manually start a container and execute scripts in it instead of using `jobs.build.container`,
+    # otherwise we couldn't use GitHub-provided actions (checkout, cache, etc.) as they rely on Node20
+    # which would not necessarily be available on some containers (e.g., Ubuntu 18.04).
+    #
+    # See: https://github.com/actions/checkout/issues/1590
+    #
+    - name: Start Docker Container
       run: |
-        apt-get update
-        apt-get install -y libharfbuzz-dev
+        docker pull $CONTAINER
+        docker run --name build-container -d -v ${{ github.workspace }}:/workspace $CONTAINER tail -f /dev/null
+
+    - name: Install Dependencies
+      env:
+        SCRIPT: |
+          apt-get update
+          apt-get install -y libharfbuzz-dev
+      run: docker exec build-container bash -c "$SCRIPT"
 
     - name: Configure
-      working-directory: ${{github.workspace}}
-      run: |
-        mkdir build
-        cd build
-        cmake --version
-        cmake .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DQt5_DIR="/opt/qt/$QT_VERSION/gcc_64/lib/cmake/Qt5"
+      env:
+        SCRIPT: |
+          cd /workspace && mkdir build && cd build
+          cmake --version
+          cmake .. -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DQt5_DIR="/opt/qt/${{env.QT_VERSION}}/gcc_64/lib/cmake/Qt5"
+      run: docker exec build-container bash -c "$SCRIPT"
 
     - name: Build
-      working-directory: ${{github.workspace}}/build
-      run: |
-          cmake --build . --parallel $PARALLEL_JOBS
-
-    - name: Prepare Artifacts
-      id: artifacts
-      working-directory: ${{github.workspace}}
-      run: |
-          mkdir artifacts
-          cp build/*.so artifacts
-          cackeKey=`date -u +"%Y-%m-%d"`-$GITHUB_RUN_ID
-          echo "cache-key=$cackeKey" >> "$GITHUB_OUTPUT"
-
-    # We cannot use upload-artifact@v4 on Ubuntu 18.04 as it requires Node 20.
-    #
-    # We cannot use upload-artifact@v3 as it is deprecated and will be removed on Nov 30, 2024:
-    #
-    # https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/
-    #
-    # Therefore with use GitHub cache instead of GitHub artifacts, and in a subsequent job
-    # using ubuntu-latest, we retrieve the cache and upload it using upload-artifact@v4.
-    #
-    # We cannot use cache@v4 on Ubuntu 18.04 as it requires Node 20.
-    #
-    # We cannot use the latest cache@v3 (as of 3.3.3) as it is buggy and does not
-    # properly support enableCrossOsArchive and fail-on-cache-miss anymore.
-    #
-    # Therefore, we use cache@v3.2.4, which is the first version supporting both
-    # enableCrossOsArchive and fail-on-cache-miss.
-    #
-    # Note that we do need `enableCrossOsArchive` otherwise the ubuntu:18.04
-    # Docker image and the ubuntu-latest image are considered different and
-    # do not share cache, that is, theyhave a different "cache version", see:
-    #
-    # - https://github.com/actions/cache/blob/main/tips-and-workarounds.md#cross-os-cache
-    # - https://github.com/marketplace/actions/cache#cache-version
-    #
-    - name: Save Artifacts
-      uses: actions/cache/save@v3.2.4
-      if: always() # If we re-run the job, we want to override the cache
-      with:
-        path: artifacts
-        key: ${{steps.artifacts.outputs.cache-key}}
-        enableCrossOsArchive: true
-
-  # This is a separate job running on ubuntu-latest to be able to use upload-artifact@v4
-  #
-  upload-artifacts:
-    name: Upload Artifacts
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-
-    - name: Restore Artifacts
-      uses: actions/cache/restore@v3.2.4
-      with:
-        path: artifacts
-        key: ${{needs.build.outputs.artifacts-cache-key}}
-        enableCrossOsArchive: true
-        fail-on-cache-miss: true
+      env:
+        SCRIPT: |
+          cd /workspace/build
+          cmake --build . --parallel ${{env.PARALLEL_JOBS}}
+      run: docker exec build-container bash -c "$SCRIPT"
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: artifacts
-        path: artifacts
+        path: ${{github.workspace}}/build/*.so
