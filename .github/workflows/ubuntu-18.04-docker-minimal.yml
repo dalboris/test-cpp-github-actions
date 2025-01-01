@@ -1,28 +1,33 @@
 name: Ubuntu 18.04 (Docker Minimal)
 on: [push, pull_request]
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-  # https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
-
+  CONTAINER: ubuntu:18.04
+  # Note: unfortunately, we cannot just use `jobs.build.container: ubuntu:18.04`,
+  # otherwise we cannot use GitHub-provided actions (checkout, cache, etc.) as
+  # they rely on Node20 which isn't available on Ubuntu 18.04.
+  # See: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ubuntu:18.04
+    # Note:  container: ubuntu:18.04 # We cannot do this since removal of Node16 in 
     steps:
 
     - uses: actions/checkout@v3 # Cannot use v4 (requires Node20/GLIBC_2.28 not available on Ubuntu 18.04)
 
     - name: Install Dependencies
-      run: |
-        apt-get update
-        apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+      uses: addnab/docker-run-action@v3
+      with:
+        image: ubuntu:18.04
+        run: |
+          apt-get update
+          apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
 
-    - name: Build
-      working-directory: ${{github.workspace}}
-      run: |
-        mkdir build
-        cd build
-        cmake --version
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        cmake --build .
+    # - name: Build
+    #   working-directory: ${{github.workspace}}
+    #   run: |
+    #     mkdir build
+    #     cd build
+    #     cmake --version
+    #     cmake .. -DCMAKE_BUILD_TYPE=Release
+    #     cmake --build .
