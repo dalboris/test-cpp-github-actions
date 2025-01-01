@@ -22,17 +22,21 @@ jobs:
       run: |
         docker run --name build-container -d -v ${{ github.workspace }}:/workspace $CONTAINER tail -f /dev/null
 
+    # - name: Install Dependencies
+    #   run: |
+    #     docker exec build-container apt-get update
+    #     docker exec build-container apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+
     - name: Install Dependencies
-      run: |
-        docker exec build-container apt-get update
-        docker exec build-container apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
+      uses: addnab/docker-run-action@v3
+      with:
+        image: build-container
+        run: |
+          apt-get update
+          apt-get install -y cmake build-essential libfreetype6-dev libharfbuzz-dev
 
 
 
-    #   uses: addnab/docker-run-action@v3
-    #   with:
-    #     image: build-container
-    #     run: |
           
 
     # - name: Build
